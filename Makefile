@@ -16,7 +16,7 @@ build:
 		-v $(PWD)/build:/build \
 		-w /tesis \
 		tesis-latex:latest \
-		pdflatex -output-directory=/build pruebas/p1.tex
+		pdflatex -output-directory=/build tesis.tex
 
 clean:
 	rm -rf build/*
