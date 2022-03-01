@@ -8,6 +8,14 @@ run:
 		-v $(PWD)/build:/build \
 		-w /tesis \
 		tesis-latex:latest bash
+shell:
+	docker run \
+		-ti --rm \
+		-v $(PWD)/src:/tesis \
+		-v $(PWD)/build:/build \
+		-w /tesis \
+		tesis-latex:latest \
+		bash
 
 build:
 	docker run \
@@ -16,7 +24,7 @@ build:
 		-v $(PWD)/build:/build \
 		-w /tesis \
 		tesis-latex:latest \
-		pdflatex -output-directory=/build tesis.tex
+		pdflatex -shell-escape -output-directory=/build tesis.tex
 
 clean:
 	rm -rf build/*
