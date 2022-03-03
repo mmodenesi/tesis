@@ -9,14 +9,14 @@ main(int argc, char *argv[])
     int i;
 
     if (argc < 3) {
-        fprintf(stderr,"Usage: call pythonfile funcname [args]\n");
+        fprintf(stderr, "Usage: call pythonfile funcname [args]\n");
         return 1;
     }
 
     Py_Initialize();
     pName = PyUnicode_DecodeFSDefault(argv[1]);
 
-/* Error checking of pName left out */
+    /* Error checking of pName left out */
 
     pModule = PyImport_Import(pName);
     Py_DECREF(pName);

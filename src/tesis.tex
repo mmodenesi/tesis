@@ -1,29 +1,44 @@
 \documentclass[]{article}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\graphicspath{{./images/}}
+
 \usepackage{xcolor}
 \definecolor{codelistingbg}{rgb}{0.95,0.95,0.95}
 \usepackage[
   cache=false,
   outputdir=/build,
 ]{minted}
-\setminted{linenos=true,bgcolor=codelistingbg}
+
+\setminted{
+    linenos=true,
+    bgcolor=codelistingbg,
+    fontsize=\scriptsize,
+    breaklines=true
+}
+
 \usepackage[utf8]{inputenc}
-\title{Omnetpy: Integración del Lenguaje Python en el Entorno de Simulación OMNeT++}
+\title{Omnetpy: Integración del Lenguaje Python en el Entorno de Simulación \omnetpp{}}
 \author{Marcos Modenesi}
 
 
 \begin{document}
+\newcommand{\omnetpp}{\mbox{OMNeT++}}
+\newcommand{\ui}[1]{\textit{#1}}
+
 \maketitle
+\tableofcontents
 
 \section{Introducción}
 \subsection{Objetivo}
 
 El objetivo de esta tesis es proveer de una interfaz simple y compacta para
 especificar el comportamiento de modelos de simulación para la plataforma
-OMNeT++ mediante el uso del lenguaje Python.
+\omnetpp{} mediante el uso del lenguaje Python.
 
 \subsection{Hipótesis}
 
-Es posible definir módulos simples de OMNeT++ en scripts escritos en Python e
+Es posible definir módulos simples de \omnetpp{} en scripts escritos en Python e
 integrarlos de manera que el usuario experience mínima o nula complejidad en el
 proceso.
 
@@ -35,91 +50,110 @@ de Python para que pueda recibir y transmitir comportamiento desde y hacia C++.
 \subsection{Impacto}
 
 El resultado del trabajo (disponible en https://github.com/mmodenesi/omnetpy/)
-resulta beneficioso para personas que buscan aprovechar la plataforma OMNeT++
+resulta beneficioso para personas que buscan aprovechar la plataforma \omnetpp{}
 para realizar simulaciones, pero para quienes la programación directa en C++
-resulta un obstáculo. En particular, facilita la utilización de OMNeT++ como
+resulta un obstáculo. En particular, facilita la utilización de \omnetpp{} como
 herramienta pedagógica en cursos de ciencias de computación donde los
 estudiantes suelen contar con un dominio bastante bueno de Python, pero en
 general desconocen C++.  El interés de este proyecto ha sido reconocido por los
-desarrolladores de OMNeT++ (https://omnetpp.org/download-items/omnetpy.html).
+desarrolladores de \omnetpp{} (https://omnetpp.org/download-items/omnetpy.html).
 
 \subsection{Estructura}
 
-El capítulo 2 de esta tesis presenta el estado del arte alrededor de OMNeT++ y
-la simulación de eventos discretos. Se realiza una comparación entre C++ y
-Python. El capítulo 3 presenta la metodología. El capítulo 4 discute el detalle
-del desarrollo. La herramienta omnetpy se presenta en el capítulo 5. El
-capítulo 6 evalúa cualitativa y cuantitativamente omnetpy. Las conclusiones se
-resumen en el capítulo 7, así como los desafíos abiertos.
+El capítulo~\ref{sec:eda} de esta tesis presenta el estado del arte alrededor
+de \omnetpp{} y la simulación de eventos discretos. Se realiza una comparación
+entre C++ y Python. El capítulo~\ref{sec:met} presenta la metodología. El
+capítulo~\ref{sec:des} discute el detalle del desarrollo. La herramienta
+omnetpy se presenta en el capítulo~\ref{sec:omnetpy}. El capítulo~\ref{sec:ev}
+evalúa cualitativa y cuantitativamente omnetpy. Las conclusiones se resumen en
+el capítulo~\ref{sec:conc}, así como los desafíos abiertos.
 
-\section{Estado del arte}
+\section{Estado del arte}\label{sec:eda}
 
 \subsection{Simuladores de eventos discretos}
 
 Un sistema es una colección de entidades que interactúan bajo ciertas reglas
-para alcanzar un fin común. Decimos que un sistema es continuo cuando las
-variables que permiten describir su estado cambian de forma contínua con
+para alcanzar un fin común. Decimos que un sistema es \textit{continuo} cuando
+las variables que permiten describir su estado cambian de forma contínua con
 respecto al tiempo (por ejemplo, altura y velocidad de un avión). En oposición,
-los sistemas discretos son aquellos en los que las variables de estado cambian
-de forma instantánea en determinados momentos en el tiempo (por ejemplo, arribo
-y partida de clientes a una estación de servicio).  A menudo es de interés
-estudiar un sistema para entender los parámetros que gobiernan su
-funcionamiento, realizar mejoras o comprender de qué manera serán impactados
-por ciertos cambios en sus entradas.  Para llevar a cabo un estudio de esta
-naturaleza, una primera opción es experimentar con el sistema real. No
-obstante, esto no siempre es deseable (podría implicar muchos gastos y
-disrupciones en el funcionamiento normal del sistema) o siquiera posible
-(quizás el sistema aún no ha sido construido). Entonces se puede recurrir a
-experimentar con un modelo del sistema.  Un modelo puede ser físico (modelo a
-escala) o matemático. Este último consiste en una serie de suposiciones sobre
-el funcionamiento del sistema que se pueden formalizar en un conjunto de
-relaciones matemáticas y lógicas entre las entidades que lo componen.  A veces
-un sistema es lo suficientemente sencillo como para que el modelo matemático
-del mismo pueda ser "resuelto" analíticamente, mediante el uso de herramientas
-tales como el cálculo diferencial, álgebra, teoría de probabilidad. Sin
-embargo, cualquier modelo más o menos interesante de un sistema no trivial
-suele ser muy complejo para ser tratado mediante estos métodos.  Aparece
-entonces la simulación como una forma de ganar comprensión sobre el
-funcionamiento del sistema. En una simulación, el modelo no es "resuelto", sino
-que es "ejercitado" con el fin de recolectar información a partir de la cual se
-puedan realizar estimaciones sobre los valores de los parámetros de interés.
+los sistemas \textit{discretos} son aquellos en los que las variables de estado
+cambian de forma instantánea en determinados momentos en el tiempo (por
+ejemplo, cantidad de clientes en una estación de servicio).
 
-% TODO: esquema de tipo de simulaciones
+A menudo es de interés estudiar un sistema para entender los parámetros que
+gobiernan su funcionamiento, realizar mejoras o comprender de qué manera serán
+impactados por ciertos cambios en sus entradas.
 
-Los modelos de simulación pueden a su vez clasificarse como:
+Para llevar a cabo un estudio de esta naturaleza, una primera opción es
+experimentar con el sistema real. No obstante, esto no siempre es deseable
+(podría implicar muchos gastos y disrupciones en el funcionamiento normal del
+sistema) o siquiera posible (quizás el sistema aún no ha sido construido).
+Entonces se puede recurrir a experimentar con un \textit{modelo} del sistema.
 
-% TODO: crear lista
+Un modelo puede ser \textit{físico} (modelo a escala) o \textit{matemático}.
+Este último consiste en una serie de suposiciones sobre el funcionamiento del
+sistema que se pueden formalizar en un conjunto de relaciones matemáticas y
+lógicas entre las entidades que lo componen.
 
-dinámicos o estáticos, según si el paso del tiempo es un factor relevante,
-estocásticos o determinísticos, según la presencia o ausencia de fuentes de aleatoriedad,
-discretos o continuos, según el tratamiento del tiempo.
+A veces un sistema es lo suficientemente sencillo como para que el modelo
+matemático del mismo pueda ser resuelto analíticamente, mediante el uso de
+herramientas tales como el cálculo diferencial, álgebra, teoría de
+probabilidad. Sin embargo, cualquier modelo más o menos interesante de un
+sistema no trivial suele ser muy complejo para ser tratado mediante estos
+métodos. Aparece entonces la simulación como una forma de ganar comprensión
+sobre el funcionamiento del sistema.
+
+\begin{figure}[h]
+\caption{Formas de estudiar un sistema}
+\centering
+\includegraphics[width=8cm]{taxonomia_enfoques}
+\end{figure}
+
+En una simulación, el modelo no es resuelto, sino que es \textit{ejercitado}
+con el fin de recolectar información a partir de la cual se puedan realizar
+estimaciones sobre los valores de los parámetros de interés.
 
 En los modelos estáticos no es relevante el paso del tiempo. Un ejemplo de
 simulación de este tipo lo ofrece el método Monte Carlo. En los modelos
 dinámicos, en cambio, el tiempo es relevante ya que se estudia la evolución del
 sistema a través de una línea temporal artificial.
 
-% TODO: crear lista
+La construcción de una simulación ofrece las siguientes ventajas:
+\begin{itemize}
+    \item Nuevas políticas, procedimientos de operación, reglas de decisión,
+flujos de información, procedimientos de organización, etc. pueden ser
+explorados sin perturbar la operación del sistema real.
 
-Estas son algunas de las ventajas de construir una simulación Nuevas políticas,
-procedimientos de operación, reglas de decisión, flujos de información,
-procedimientos de organización, etc. pueden ser explorados sin perturbar la
-operación del sistema real.  Nuevos diseños pueden ser probados sin asignar
-recursos a la adquisición de elementos físicos, antes de implementar cambios en
-el mundo real, Permite validar hipótesis y responder a preguntas de tipo "¿qué
-pasaría si…?".  El diseño de la simulación permite ganar conocimiento sobre el
-sistema bajo investigación.  Permite cambiar los valores de entrada para
-observar cambios en las salidas, lo cual facilita una mayor comprensión sobre
-cuáles son las variables más relevantes y cómo interactúan.  Proporciona una
-herramienta de gran valor pedagógico.  Permite verificar soluciones analíticas.
-El tiempo es artificial, y por lo tanto puede ser contraído (simular meses o
-años de funcionamiento de un sistema en algunos minutos), expandido (observar
-cambios que de otra forma serían demasiado rápidos) e incluso pausado y
-avanzado manualmente.  El concepto básico de una simulación es fácil de
-interpretar, por lo tanto puede ser una herramienta útil a la hora de
-justificar decisiones a clientes, inversores, gestores, etc.  Puede ser más
-creíble que un modelo matemático resuelto de forma analítica, porque necesita
-hacer menos simplificaciones.
+    \item Nuevos diseños pueden ser probados sin asignar recursos a la
+adquisición de elementos físicos, antes de implementar cambios en el mundo
+real.
+
+    \item Permite validar hipótesis y responder a preguntas de tipo ``¿qué
+pasaría si...?''.
+
+    \item El diseño de la simulación permite ganar conocimiento sobre el
+sistema bajo investigación.
+
+    \item Permite cambiar los valores de entrada para observar cambios en las
+salidas, lo cual facilita una mayor comprensión sobre cuáles son las variables
+más relevantes y cómo interactúan.
+
+    \item Proporciona una herramienta de gran valor pedagógico.
+
+    \item Permite verificar soluciones analíticas.
+
+    \item El tiempo es artificial, y por lo tanto puede ser contraído (simular
+meses o años de funcionamiento de un sistema en algunos minutos), expandido
+(observar cambios que de otra forma serían demasiado rápidos) e incluso pausado
+y avanzado manualmente.
+
+    \item El concepto básico de una simulación es fácil de interpretar, por lo
+tanto puede ser una herramienta útil a la hora de justificar decisiones a
+clientes, inversores, gestores, etc.
+
+    \item Puede ser más creíble que un modelo matemático resuelto de forma
+analítica, porque necesita hacer menos simplificaciones.
+\end{itemize}
 
 La simulación de eventos discretos involucra el modelado de un sistema y su
 evolución mediante una representación en la cual las variables de estado
@@ -129,51 +163,53 @@ definido como una ocurrencia instantánea que tiene la potencialidad de cambiar
 el estado del sistema. Decimos que hay una potencialidad de cambiar el estado
 del sistema porque un evento puede utilizarse de manera que no cambie el
 sistema pero que cumpla otros fines. Por ejemplo, se puede programar un evento
-que dará fin a la simulación en un tiempo particular.  Si bien en principio
-sería posible llevar a cabo una simulación de eventos discretos a mano,
-registrando el estado del modelo ante cada nuevo evento, la cantidad de
-información que habría que manipular para simular cualquier sistema del mundo
-real hace que esta tarea sólo sea abordada mediante el uso de software
-especializado.  Un simulador de eventos discretos es un tipo especial de
-programa destinado a soportar la simulación de sistemas mediante modelos
-dinámicos y discretos. En dichos programas es común encontrar los siguientes
-componentes:
+que dará fin a la simulación en un tiempo particular.
 
-% TODO: crear lista
+Si bien en principio sería posible llevar a cabo una simulación de eventos
+discretos a mano, registrando el estado del modelo ante cada nuevo evento, la
+cantidad de información que habría que manipular para simular cualquier sistema
+del mundo real hace que esta tarea sólo sea abordada mediante el uso de
+software especializado.
 
-Estado del sistema: colección de variables necesarias para describir el sistema
-en un punto particular del tiempo.
+Un simulador de eventos discretos es un programa destinado a soportar la
+simulación de sistemas mediante modelos dinámicos y discretos. En dichos
+programas es común encontrar los siguientes componentes:
 
-Reloj de simulación: una variable especial para llevar cuenta del tiempo.
+\begin{itemize}
+    \item Estado del sistema: colección de variables necesarias para describir
+el sistema en un punto particular del tiempo.
 
-Lista de eventos: una lista con los eventos futuros.
+    \item Reloj de simulación: una variable especial para llevar cuenta del
+tiempo.
 
-Contadores: variables usadas para almacenar información estadística sobre el
-desempeño del sistema.
+    \item Lista de eventos: una lista con los eventos futuros.
 
-Fuentes de variables aleatorias para las distribuciones más comunes.
+    \item Contadores: variables usadas para almacenar información estadística
+sobre el desempeño del sistema.
 
-Herramientas de recolección y manipulación de datos, procesamiento estadístico
-y representación visual de los mismos.
+    \item Fuentes de variables aleatorias para las distribuciones más comunes.
 
-Interfaz gráfica que proporciona una representación visual del sistema (en dos
-o tres dimensiones), mostrando animaciones que ayudan al seguimiento de los
-cambios de estado.
+    \item Herramientas de recolección y manipulación de datos, procesamiento
+estadístico y representación visual de los mismos.
 
-% TODO: bibligrafía
+    \item Interfaz gráfica que proporciona una representación visual del
+sistema (en dos o tres dimensiones), mostrando animaciones que ayudan al
+seguimiento de los cambios de estado.
+\end{itemize}
+
 Las fuentes consultadas en la confección de este capítulo fueron [1], [2], [3].
 
-\subsection{Simulador OMNeT++}
+\subsection{Simulador \omnetpp{}}
 
-Objective Modular Network Testbed in C++ (OMNeT++) es un simulador de eventos
+Objective Modular Network Testbed in C++ (\omnetpp{}) es un simulador de eventos
 discretos modular y orientado a objetos, escrito en el lenguaje de propósito
 general C++. Originado en 1997 por András Varga, es un software de código
 abierto que puede ser utilizado libremente para usos no comerciales
-(principalmente investigación y enseñanza). Existe una extensión de OMNeT++
+(principalmente investigación y enseñanza). Existe una extensión de \omnetpp{}
 para usos comerciales llamada OMNEST.
 
 Principalmente orientado a la simulación de sistemas de comunicación,
-multiprocesadores y otros sistemas distribuidos, OMNeT++ es lo suficientemente
+multiprocesadores y otros sistemas distribuidos, \omnetpp{} es lo suficientemente
 general como para resultar de utilidad en otros dominios (diseño de protocolos,
 validación de arquitecturas de hardware, evaluación de desempeño de sistemas de
 software, y en general, cualquier sistema donde el enfoque de eventos discretos
@@ -185,8 +221,8 @@ redes que no son parte del paquete principal (por ejemplo, librerías de
 simulación de protocolos TCP) aparezcan espontáneamente desde una comunidad de
 usuarios muy activa.
 
-Hace mucho énfasis en la facilidad de depuración y trazabilidad de los
-elementos constituyentes del modelo, para lo cual es posible ejecutar las
+\omnetpp{} hace mucho énfasis en la facilidad de depuración y trazabilidad de
+los elementos constituyentes del modelo, para lo cual es posible ejecutar las
 simulaciones en un ambiente de interfaz gráfica que presenta animaciones para
 los eventos (mensajes) y brinda facilidad de inspección de los módulos
 intervinientes.
@@ -200,14 +236,14 @@ paralelizadas en un cluster de computadoras.
 Busca apoyarse en interfaces abiertas (archivos de texto plano, formatos
 comunes) para posibilitar la interacción con otras herramientas.
 
-\subsubsection{Introducción a OMNeT++}
+\subsubsection{Introducción a \omnetpp{}}
 
 En esta sección se describen en detalles los diferentes componentes de un
-modelo de simulación de OMNeT++ desde la perspectiva del usuario.
+modelo de simulación de \omnetpp{} desde la perspectiva del usuario.
 
 \paragraph{Modelos y estructura jerárquica}
 
-En OMNeT++, un modelo consiste de módulos que se comunican mediante el paso de
+En \omnetpp{}, un modelo consiste de módulos que se comunican mediante el paso de
 mensajes. Los módulos simples se escriben en el lenguaje de programación C++,
 utilizando clases de la librería de simulación. Estos módulos simples
 constituyen el componente atómico (no se pueden subdividir) y activo (es donde
@@ -234,29 +270,27 @@ configuración, o pueden ser tomados de una fuente de valores aleatorios.
 
 \paragraph{El lenguaje NED}
 
-NED es un lenguaje declarativo creado específicamente para OMNeT++, en el cual
+NED es un lenguaje declarativo creado específicamente para \omnetpp{}, en el cual
 el usuario define la estructura del modelo (módulos e interconexiones).
 
 Una definición de modelo puede constar de declaraciones de módulos simples,
 módulos compuestos y definiciones de la red:
 
+\begin{itemize}
+    \item Los módulos simples describen su interfaz: compuertas y parámetros.
 
-% TODO: crear lista
+    \item Los módulos compuestos son definidos mediante la declaración de su
+interfaz externa (compuertas y parámetros) así como la definición de sus
+submódulos y sus interconexiones.
 
-Los módulos simples describen su interfaz: compuertas y parámetros
-
-Los módulos compuestos son definidos mediante la declaración de su interfaz
-externa (compuertas y parámetros) así como la definición de sus submódulos y
-sus interconexiones.
-
-La definición de una red típicamente define al modelo como una instancia de un
-módulo particular.
-
+    \item La definición de una red típicamente define al modelo como una
+instancia de un módulo particular.
+\end{itemize}
 
 Las definiciones NED soportan la partición en diferentes archivos mediante el
 mecanismo de inclusión.
 
-OMNeT++ incluye un editor gráfico que toma como partida los archivos NED. El
+\omnetpp{} incluye un editor gráfico que toma como partida los archivos NED. El
 usuario puede hacer cambios tanto en la vista gráfica como directamente en el
 texto del archivo, y cambiar de vista en cualquier momento.
 
@@ -270,7 +304,6 @@ haciendo imposible la edición gráfica.
 El lenguaje NED es compatible con el formato XML, lo que posibilita la carga
 dinámica de modelos que provengan de otras fuentes.
 
-
 \paragraph{Programación de módulos simples}
 
 Los módulos simples son los elementos activos del sistema y funcionan como
@@ -279,21 +312,24 @@ modelo de simulación.
 
 El usuario implementa la funcionalidad de un módulo simple heredando de la
 clase \verb!cSimpleModule!, que es parte de las librerías de simulación de
-OMNeT++ y puede optar por dos paradigmas de programación diferentes:
+\omnetpp{} y puede optar por dos paradigmas de programación diferentes:
 
-
-% TODO: crear lista
+\begin{itemize}
+    \item basado en corrutinas
+    \item basado en el procesamiento de eventos
+\end{itemize}
 
 En el paradigma basado en corrutinas, el código del modelo corre en su propio
 hilo, el cual recibe el control del kernel cada vez que el módulo recibe un
-mensaje. Típicamente, este código nunca incluye un return: sus puntos de
-entrada son llamadas a  receive (esperar el siguiente mensaje) y sus puntos de
-salida son llamadas a send (enviar un mensaje)
+mensaje. Típicamente, este código nunca incluye un \verb!return!: sus puntos de
+entrada son llamadas a \verb!receive! (esperar el siguiente mensaje) y sus
+puntos de salida son llamadas a \verb!send! (enviar un mensaje)
 
-paradigma basado en el procesamiento de eventos: el kernel de simulación llama
-a una función específica del módulo (\verb!handleMessage!) con el mensaje como
-argumento. Esta función debe ejecutar un \verb!return! al terminar de procesar
-el mensaje, efectivamente devolviendo el control al kernel de simulación
+En el paradigma basado en el procesamiento de eventos, el kernel de simulación
+llama a una función específica del módulo (\verb!handleMessage!) con el mensaje
+como argumento. Esta función debe ejecutar un \verb!return! al terminar de
+procesar el mensaje, efectivamente devolviendo el control al kernel de
+simulación.
 
 Además de el código destinado al envío y recepción de mensajes, es posible
 escribir código que se ejecuta durante la inicialización y finalización del
@@ -321,25 +357,25 @@ aleatorias, cuánto tiempo puede durar como máximo la simulación, etc.
 La edición de los diferentes archivos que intervienen (archivos de C++,
 archivos NED, archivos ini) puede realizarse cómodamente desde un Entorno de
 Desarrollo Integrado (IDE, por sus siglas en inglés) que es parte de la
-distribución oficial de OMNeT++. Las ventajas de programar desde este IDE son
+distribución oficial de \omnetpp{}. Las ventajas de programar desde este IDE son
 múltiples:
 
-% TODO: crear lista
+\begin{itemize}
+    \item Introspección de código, navegación a la definición de una variable,
+navegación a la documentación.
 
-Introspección de código, navegación a la definición de una variable, navegación
-a la documentación.
+    \item Asistencia para operaciones comunes de refactorización de código.
 
-Asistencia para operaciones comunes de refactorización de código.
+    \item Acceso rápido a funcionalidades comunes como compilación o ejecución.
 
-Acceso rápido a funcionalidades comunes como compilación o ejecución.
+    \item Resaltado de sintaxis de los diferentes lenguajes
 
-Resaltado de sintaxis de los diferentes lenguajes
+    \item Depuración de código.
 
-Depuración de código.
+    \item Asistente para la generación de nuevos proyectos.
 
-Asistente para la generación de nuevos proyectos.
-
-Edición de archivos NED desde la vista gráfica.
+    \item Edición de archivos NED desde la vista gráfica.
+\end{itemize}
 
 A su vez, este entorno de desarrollo integrado ofrece la posibilidad de
 visualizar gráficos de diversos tipos a partir de los datos generados durante
@@ -348,7 +384,7 @@ una simulación.
 \paragraph{Ejecución de una simulación}
 
 El código de los módulos simples se compila enlazando con las librerías de
-simulación de OMNeT++ creando un binario que constituye el ejecutable de la
+simulación de \omnetpp{} creando un binario que constituye el ejecutable de la
 simulación. Cambios posteriores a los archivos NED (cambios en la topología y
 en los parámetros) o en los archivos \verb!ini! (cantidad y duración de las
 simulaciones, distribuciones de las variables aleatorias, valores de los
@@ -361,68 +397,72 @@ lote).
 
 \subsubsection{Ecosistema y casos de uso}
 
-Desde sus comienzos, cerca del año 2000, OMNeT++ ha tenido una amplia recepción
+Desde sus comienzos, cerca del año 2000, \omnetpp{} ha tenido una amplia recepción
 en entornos de investigación, educativos, así como también en la industria.
 Diversos proyectos independientes han aportado nuevas librerías reutilizables y
 modelos de dominios específicos, algunos de los cuales se listan a
 continuación:
 
-% TODO: crear lista
+\begin{itemize}
+    \item INET Framework [7] provee soporte para simulaciones de redes de
+comunicación que utilizan los protocolos de Internet (TCP, UDP, IPv4, IPv6,
+OSPF, BGP, etc.), así como protocolos cableados e inalámbricos de la capa de
+enlace (Ethernet, PPP, IEEE 802.11, etc.) y soporte para redes móviles,
+protocolos MANET (Mobile Ad Hoc Networks), DiffServ, etc. Muchos otros
+proyectos toman INET como base y la extienden en direcciones específicas, como
+redes de vehículos, overlay, P2P, LTE.
 
-INET Framework [7] provee soporte para simulaciones de redes de comunicación
-que utilizan los protocolos de Internet (TCP, UDP, IPv4, IPv6, OSPF, BGP,
-etc.), así como protocolos cableados e inalámbricos de la capa de enlace
-(Ethernet, PPP, IEEE 802.11, etc.) y soporte para redes móviles, protocolos
-MANET (Mobile Ad Hoc Networks), DiffServ, etc. Muchos otros proyectos toman
-INET como base y la extienden en direcciones específicas, como redes de
-vehículos, overlay, P2P, LTE.
+    \item Simu5G [8][9] producto de un proyecto de investigación conjunta entre
+Intel Corporation y el Computer Networking Group de la Universidad de Pisa,
+Italia, provee soporte para redes 5G NewRado.
 
-Simu5G [8][9] producto de un proyecto de investigación conjunta entre Intel
-Corporation y el Computer Networking Group de la Universidad de Pisa, Italia,
-provee soporte para redes 5G NewRado.
+    \item SimulLTE [10][11] provee librerías para la simulación de redes LTE y
+LTA.
 
-SimulLTE [10][11] provee librerías para la simulación de redes LTE y LTA.
+    \item Veins [12][13] es un framework de simulación de código abierto de IVC
+(Inter-Vehicular Communication) que utiliza \omnetpp{} para la simulación de
+redes así como SUMO, un simulador de tráfico vehicular, usando cosimulación.
 
-Veins [12][13] es un framework de simulación de código abierto de IVC
-(Inter-Vehicular Communication) que utiliza OMNeT++ para la simulación de redes
-así como SUMO, un simulador de tráfico vehicular, usando cosimulación.
+    \item CoRE4INET[14] es una extensión a la herramienta INET para
+simulaciones basadas en eventos de real-time Ethernet dentro del simulador
+\omnetpp{}.
 
-CoRE4INET[14] es una extensión a la herramienta INET para simulaciones basadas
-en eventos de real-time Ethernet dentro del simulador OMNeT++.
+\end{itemize}
 
-Una lista más completa y detallada puede conseguirse visitando el sitio de
-OMNeT++ [16].
+Una lista completa puede conseguirse visitando el sitio de \omnetpp{} [16].
 
-Desde el año 2008 en forma continuada, la comunidad de OMNeT++ se reúne
+Desde el año 2008 en forma continuada, la comunidad de \omnetpp{} se reúne
 anualmente en un evento en el que se comparten experiencias, casos de usos y se
-realizan "hackatones", maratones de programación en los que se busca atacar un
-problema concreto de forma creativa en pocas horas. Algunos de los temas
+realizan ``hackatones'', maratones de programación en los que se busca atacar
+un problema concreto de forma creativa en pocas horas. Algunos de los temas
 presentados:
 
-% TODO: crear lista
+\begin{itemize}
+    \item Development and Testing of Automotive Ethernet-Networks together in
+one Tool - \omnetpp{} (Patrick Wunner, Stefan May, Kristian Trenkel, and
+Sebastian Dengler)
 
-Development and Testing of Automotive Ethernet-Networks together in one Tool -
-OMNeT++ (Patrick Wunner, Stefan May, Kristian Trenkel, and Sebastian Dengler)
+    \item Implementation of an Adaptive Energy-efficient MAC Protocol in
+\omnetpp{} / MiXiM (Van Thiep Nguyen, Matthieu Gautier, and Olivier Berder)
 
-Implementation of an Adaptive Energy-efficient MAC Protocol in OMNeT++ / MiXiM
-(Van Thiep Nguyen, Matthieu Gautier, and Olivier Berder)
+    \item Attack of the Ants: Studying Ant Routing Algorithms in Simulation and
+Wireless Testbeds (Michael Frey and Mesut Günes)
 
-Attack of the Ants: Studying Ant Routing Algorithms in Simulation and Wireless
-Testbeds (Michael Frey and Mesut Günes)
+    \item Modeling Quantum Optical Components, Pulses and Fiber Channels Using
+\omnetpp{} (Ryan D. L. Engle, Douglas D. Hodson, Michael R. Grimaila, Logan O.
+Mailloux, Colin V. McLaughlin and Gerald Baumgartner)
 
-Modeling Quantum Optical Components, Pulses and Fiber Channels Using OMNeT++
-(Ryan D. L. Engle, Douglas D. Hodson, Michael R. Grimaila, Logan O. Mailloux,
-Colin V. McLaughlin and Gerald Baumgartner)
+    \item High Frequency Radio Network Simulation Using \omnetpp{} (Jeffery
+Weston and Eric Koski)
 
-High Frequency Radio Network Simulation Using OMNeT++ (Jeffery Weston and Eric
-Koski)
+    \item Stacked-VLAN-Based Modeling of Hybrid ISP Traffic Control Schemes and
+Service Plans Exploiting Excess Bandwidth in Shared Access Networks (Kyeong Soo
+Kim)
 
-Stacked-VLAN-Based Modeling of Hybrid ISP Traffic Control Schemes and Service
-Plans Exploiting Excess Bandwidth in Shared Access Networks (Kyeong Soo Kim)
-
-DoS Protection through Credit Based Metering - Simulation Based Evaluation for
-Time-Sensitive Networking in Cars (Philipp Meyer, Timo Häckel, Franz Korf and
-Thomas Schmidt).
+    \item DoS Protection through Credit Based Metering - Simulation Based
+Evaluation for Time-Sensitive Networking in Cars (Philipp Meyer, Timo Häckel,
+Franz Korf and Thomas Schmidt).
+\end{itemize}
 
 Para una lista completa se recomienda visitar la página oficial de los archivos
 de la conferencia. [17].
@@ -433,7 +473,7 @@ Las fuentes consultadas en la confección de este capítulo fueron [4], [5], [6]
 
 Esta sección presenta brevemente los principales proyectos que cumplen el rol
 de simulador de eventos discretos, sus características y sus diferencias con
-OMNeT++. En particular, se toma el caso de SimPy que es, hasta donde alcanza
+\omnetpp{}. En particular, se toma el caso de SimPy que es, hasta donde alcanza
 nuestro conocimiento, el único programa de este tipo basado en el lenguaje
 Python.
 
@@ -443,11 +483,11 @@ Herramienta orientada a la simulación de redes de comunicación, dirigido
 principalmente al uso académico y educativo [18]. Es un proyecto de código
 abierto, gratuito, liberado bajo la licencia GNU GPLv2 mantenido por su
 comunidad. Está basado en C++ y parte de la API de simulación cuenta con
-"bindings" (enlaces) para Python que son generados automáticamente (hasta
+``bindings'' (enlaces) para Python que son generados automáticamente (hasta
 donde este proceso es automatizable) y cuya completitud y correctitud no es el
 principal objetivo del proyecto [19].
 
-A diferencia de OMNeT++, la simulación y la visualización (depuración,
+A diferencia de \omnetpp{}, la simulación y la visualización (depuración,
 trazabilidad) son temas separados. Por defecto, no presenta interfaz gráfica
 para mostrar animaciones de los modelos. Las trazas generadas durante una
 simulación pueden procesarse en otro software denominado NetAsim que permite la
@@ -458,9 +498,9 @@ depuración.
 
 A pesar de su filosofía de modularización, esta herramienta no separa los
 múltiples aspectos de una simulación (lógica, configuración, topología) en
-diferentes archivos, si no que todo esto se realiza  directamente mediante el
+diferentes archivos, si no que todo esto se realiza directamente mediante el
 código C++. Por esta razón, el usuario tiene que proveer más código C++ que en
-una simulación típica de OMNeT++, ya que el programa incluye desde el
+una simulación típica de \omnetpp{}, ya que el programa incluye desde el
 tratamiento de los argumentos del programa (si los hubiere), la declaración y
 configuración de los nodos, los canales, las aplicaciones, el nivel de logging,
 etc, hasta la misma inicialización y finalización de la simulación.
@@ -498,25 +538,25 @@ Se trata de una librería de código abierto para escribir simulaciones de
 eventos discretos en lenguaje Python, distribuida bajo una licencia MIT que
 posibilita su uso libre [21].
 
-La simulación se estructura alrededor del concepto de "proceso", que constituye
-el elemento activo de la simulación (un cliente, un coche, un nodo de una red),
-haciendo uso de generadores.
+La simulación se estructura alrededor del concepto de \textit{proceso}, que
+constituye el elemento activo de la simulación (un cliente, un coche, un nodo
+de una red), haciendo uso de generadores.
 
-En Python, un generador es un tipo especial de función que incluye la palabra
-reservada \verb!yield!. Al ejecutar la instrucción \verb!yield!, la función es
-pausada y el control retorna al código que la llamó. Posteriormente, la
-ejecución de la corrutina se puede reanudar, desde el mismo punto donde cedió
-el control. Esta característica del lenguaje Python ofrece un recurso que SimPy
-utiliza para estructurar la simulación, en un modelo de corrutinas (funciones
-que ceden el control voluntariamente en lo que se denomina concurrencia
-cooperativa).
+Los procesos se programan utilizando generadores.  En Python, un generador es
+un tipo especial de función que incluye la palabra reservada \verb!yield!. Al
+ejecutar la instrucción \verb!yield!, la función es pausada y el control
+retorna al código que la llamó. Posteriormente, la ejecución de la corrutina se
+puede reanudar, desde el mismo punto donde cedió el control. Esta
+característica del lenguaje Python ofrece un recurso que SimPy utiliza para
+estructurar la simulación, en un modelo de corrutinas (funciones que ceden el
+control voluntariamente en lo que se denomina concurrencia cooperativa).
 
-Estas funciones crean eventos y ceden el control al orquestador de la
-simulación cuando ejecutan un \verb!yield!. Cuando el evento "ocurre" (llega su
-momento en el tiempo de la simulación) el proceso continúa.
+Estos generadores crean eventos y ceden el control al orquestador de la
+simulación cuando ejecutan un \verb!yield!. Cuando el evento \textit{ocurre}
+(llega su momento en el tiempo de la simulación) el proceso continúa.
 
 Simpy incluye también funcionalidad para modelar el uso de recursos
-compartidos, y la interacción de procesos.
+compartidos y la interacción de procesos.
 
 Es importante notar que SimPy es simplemente una librería que implementa el
 código básico para estructurar una simulación, pero no provee muchas de las
@@ -532,7 +572,7 @@ SimPy, hecho en Python, un caso excepcional. En esta sección se hace una breve
 comparación entre C++ y Python, para entender qué se gana y qué se pierde al
 utilizar cada lenguaje. Esto nos permitirá fundamentar mejor por qué este
 proyecto toma la iniciativa de permitir la utilización de la herramienta
-OMNeT++ (escrita en C++) desde código escrito enteramente en Python.
+\omnetpp{} (escrita en C++) desde código escrito enteramente en Python.
 
 \subsubsection{Generalidades}
 
@@ -576,10 +616,10 @@ muchas veces se puede asemejar a leer un texto en inglés.
 C++ es un lenguaje compilado. El código fuente es finalmente convertido a un
 formato binario que puede ser ejecutado instrucción por instrucción por el
 procesador de la computadora. Un paso intermedio realizado por una herramienta
-conocida como "preprocesador" puede además realizar cambios en el conjunto de
+conocida como ``preprocesador'' puede además realizar cambios en el conjunto de
 caracteres escrito directamente por el programador, insertando otros archivos
 (directiva \verb!#include!), incluyendo o excluyendo ciertos bloques (directiva
-\verb!#ifdef!) o también expandiendo lo que comúnmente se conoce como "macros".
+\verb!#ifdef!) o también expandiendo lo que comúnmente se conoce como ``macros''.
 Esto agrega un nivel de dificultad más a la sintaxis de C++, ya que lo que el
 programador escribe, no suele ser exactamente igual a lo que el compilador
 recibe para convertir a binario.
@@ -587,34 +627,35 @@ recibe para convertir a binario.
 Python no es un lenguaje compilado, como C++, C o go, si no que es un lenguaje
 interpretado: el código fuente no es convertido directamente a código máquina
 para su ejecución en un procesador. El código escrito en Python debe ser
-proporcionado a un programa especial que se conoce como "intérprete". Tras una
-primera etapa de preprocesado (parseo, elaboración del AST, generación de
+proporcionado a un programa especial que se conoce como ``intérprete''. Tras
+una primera etapa de preprocesado (parseo, elaboración del AST, generación de
 bytecode propio de Python), el intérprete se encarga de llevar adelante la
 ejecución instrucción por instrucción. Este intérprete es en sí mismo un
-programa que se llama comúnmente "Python" (o  también Python3, Python35, etc.,
-dependiendo de la versión).
+programa que se llama comúnmente ``Python'' (o también Python3, Python35,
+etc., dependiendo de la versión).
 
 No existe un único intérprete de Python. El más popular y difundido, conocido
-como "cPython", es el intérprete de referencia de Guido Van Rossum (creador del
-lenguaje) escrito en C. Puede considerarse la implementación oficial: se lo
-referencia como "Python" y se usa el término "cPython" (como en este párrafo)
-cuando se busca distinguirlo de otras implementaciones [23].
+como ``cPython'', es el intérprete de referencia de Guido Van Rossum (creador
+del lenguaje) escrito en C. Puede considerarse la implementación oficial: se lo
+referencia como ``Python'' y se usa el término ``cPython'' (como en este
+párrafo) cuando se busca distinguirlo de otras implementaciones [23].
 
-Notar que el término "Python" tiene (al menos) dos significados:
+Notar que el término ``Python'' tiene (al menos) dos significados:
 
-% TODO: crear lista
+\begin{itemize}
+    \item Es un lenguaje de programación definido mediante ciertas reglas
+sintácticas que delimitan las cadenas de caracteres que constituyen un programa
+válido y las separan de aquellas que, contrariamente, no son programas válidos
+[24].
 
-Es un lenguaje de programación definido mediante ciertas reglas sintácticas que
-delimitan las cadenas de caracteres que constituyen un programa válido y las
-separan de aquellas que, contrariamente, no son programas válidos [24].
+    \item Es un binario que sirve de intérprete (ejecutor) de ciertos programas
+escritos usando tales reglas sintácticas.
+\end{itemize}
 
-Es un binario que sirve de intérprete (ejecutor) de ciertos programas escritos
-usando tales reglas sintácticas.
-
-A lo largo de este trabajo, cuando hablamos de "Python" nos referimos al
+A lo largo de este trabajo, cuando hablamos de ``Python'' nos referimos al
 lenguaje. Para referirnos al binario que ejecuta archivos fuente en este
-lenguaje, hablamos del "intérprete" o "intérprete de Python". Más
-específicamente, nos referimos a la implementación oficial en C o "cPython". 
+lenguaje, hablamos del ``intérprete'' o ``intérprete de Python''. Más
+específicamente, nos referimos a la implementación oficial en C (cPython). 
 
 \subsubsection{Distancia al hardware}
 
@@ -629,17 +670,7 @@ direcciona la memoria manualmente, se opera al nivel de bytes.
 
 En general, en lenguajes de tan bajo nivel, se gana un control extremo sobre el
 uso del hardware, pero se invierte un tiempo enorme en realizar tareas
-triviales, y se hace en extremo difícil evitar errores. En una clasificación de
-más cerca a más lejos del hardware (lenguajes de bajo nivel a lenguajes de alto
-nivel) podríamos encontrar lo siguiente:
-
-% TODO: crear diagrama
-
-Python - Javascript - PHP
-Ruby - Perl
-Go
-C - C++
-Assembly
+triviales, y se hace en extremo difícil evitar errores.
 
 Si bien C++ presenta muchas características de lenguaje de alto nivel, en
 general no hay una gran abstracción sobre los detalles de una computadora. Por
@@ -659,7 +690,7 @@ una penalidad en la performance y una ganancia en la usabilidad del lenguaje.
 
 C++ es un lenguaje imperativo que puede utilizarse principalmente para escribir
 programas de paradigma procedimental u orientado a objetos. Asimismo, una
-característica del lenguaje que son los llamados templates o "plantillas"
+característica del lenguaje que son los llamados templates o ``plantillas''
 habilita a formas de programación genérica (código genérico cuya información de
 tipo será definida en tiempo de compilación).
 
@@ -682,13 +713,13 @@ pero estos tipos no son expresados como parte del programa). En general, esto
 conduce a programas más fáciles de escribir y de leer, aunque no permite
 detectar errores de tipos si no hasta que el código es ejecutado. Esto último,
 sin embargo, no es visto como un problema en Python, por el contrario, se dice
-que Python utiliza duck typing [26] (tipado del "pato"), explicándolo con la
-frase "si camina como un pato y hace el sonido de un pato, entonces es un
-pato". En la práctica, esto quiere decir que Python favorece el paradigma en el
+que Python utiliza duck typing [26] (tipado del ``pato''), explicándolo con la
+frase ``si camina como un pato y hace el sonido de un pato, entonces es un
+pato''. En la práctica, esto quiere decir que Python favorece el paradigma en el
 cual un objeto sirve en cualquier circunstancia donde pueda hacer lo que se
 espera de él, independientemente de si tiene un tipo u otro. No se chequean los
 tipos de los objetos (de hecho, herramientas del lenguaje que permiten hacerlo
-como la función "isinstance", generan fuertes opiniones en contra de su uso
+como la función ``isinstance'', generan fuertes opiniones en contra de su uso
 [27]) si no que se espera que un objeto pueda proveer el comportamiento
 necesario (interfaz).
 
@@ -698,7 +729,7 @@ C++, además del núcleo del lenguaje, provee la STL (Standard Template Library)
 un conjunto de plantillas de clases que implementa muchos de los tipos de datos
 más populares (listas, vectores, colas, stacks), así como algunos algoritmos. 
 
-Python es considerado un lenguaje con "baterías incluidas" por la vastedad de
+Python es considerado un lenguaje con ``baterías incluidas'' por la vastedad de
 funcionalidad que se encuentra en su librería estándar. En ella encontramos
 módulos para realizar operaciones comunes (manejo de fechas, establecer
 comunicaciones http, compresión de archivos, envío de email, operaciones
@@ -712,23 +743,22 @@ repositorios de paquetes, siendo pypi.org el servidor oficial. Algunos paquetes
 dentro de esta categoría han llegado a estandarizarse como las librerías por
 defecto para realizar ciertas funciones:
 
-% TODO: crear diagrama
-
-visualización de gráficos: maptlotlib, pyplt
-procesamiento numérico: NumPy
-ciencia de datos: Pandas, SciKit-learn, PyTorch, TensorFlow, Keras
+\begin{itemize}
+    \item visualización de gráficos: maptlotlib, pyplt
+    \item procesamiento numérico: NumPy
+    \item ciencia de datos: Pandas, SciKit-learn, PyTorch, TensorFlow, Keras
+\end{itemize}
 
 \subsubsection{Manejo de memoria}
 
 En C++ hay tres tipos de almacenamiento donde las variables pueden ser
 alojadas:
 
-
-% TODO: crear lista
-
-Memoria automática (stack)
-Memoria estática
-Memoria manual (heap)
+\begin{itemize}
+    \item Memoria automática (stack)
+    \item Memoria estática
+    \item Memoria manual (heap)
+\end{itemize}
 
 Las variables locales de cada función (especialmente cuando son valores que
 caben en pocos bytes, como algunos enteros, caracteres, etc.) son almacenadas
@@ -740,8 +770,8 @@ Las variables en memoria estática se utilizan sólo para aquellas variables que
 se declaran e inicializan en tiempo de compilación.
 
 La mayoría de las veces, el programador debe recurrir a crear variables en el
-heap (ya sea porque necesita muchos objetos, o se trata de objetos "grandes",
-de varios bytes, que no caben en el stack). Este "heap" constituye una fuente
+heap (ya sea porque necesita muchos objetos, o se trata de objetos ``grandes'',
+de varios bytes, que no caben en el stack). Este ``heap'' constituye una fuente
 de memoria que debe ser primeramente pedida al sistema operativo y debe ser
 devuelta posteriormente, cuando ya no es utilizada. Fallar en manejar
 correctamente este proceso implicaría la terminación inmediata del programa (si
@@ -768,15 +798,15 @@ están alineados los objetos en relación a las direcciones de memoria, chequear
 que la memoria está correctamente utilizada, etc. Todo esto está resuelto por
 el intérprete. Pero, a su vez, tiene costos:
 
-% TODO: crear lista
+\begin{itemize}
+    \item El algoritmo del Garbage Collector necesita tiempo para correr, y
+este tiempo es en detrimento de la ejecución de nuestra aplicación
 
-El algoritmo del Garbage Collector necesita tiempo para correr, y este tiempo
-es en detrimento de la ejecución de nuestra aplicación
-
-El diseño de la gestión de la memoria busca minimizar el número de llamadas al
-sistema operativo y suele pedir recursos en bloques grandes, para gestión
-interna, conduciendo a aplicaciones que generalmente reservan más memoria de la
-estrictamente necesaria.
+    \item El diseño de la gestión de la memoria busca minimizar el número de
+llamadas al sistema operativo y suele pedir recursos en bloques grandes, para
+gestión interna, conduciendo a aplicaciones que generalmente reservan más
+memoria de la estrictamente necesaria.
+\end{itemize}
 
 Otra razón por lo que los programas hechos en Python suelen usar más memoria
 que programas equivalentes hechos en C++ es que en Python, todo es un objeto,
@@ -795,7 +825,7 @@ lenguaje más difícil, propenso a errores en manos no expertas. Se ha señalado
 que Python es un lenguaje más amigable para novatos y más apropiado para la
 enseñanza de conceptos en ciencias de la computación [29].
 
-\section{Metodología}
+\section{Metodología}\label{sec:met}
 
 \subsubsection{Integrando C++ y Python}
 
@@ -806,19 +836,21 @@ mecanismos.
 Siguiendo la documentación oficial [31], es común clasificar las integraciones
 entre C/C++ y Python en dos grupos:
 
-% TODO: insertar imagen
+\begin{itemize}
+    \item \textbf{Extender el intérprete}: invocar código escrito en C/C++
+desde un programa escrito en Python.
 
-Invocar código escrito en C/C++ desde un programa escrito en Python. Esto se
-conoce como "extender el intérprete".
+    \item \textbf{Embeber el intérprete}: Invocar código originalmente escrito
+en Python desde un programa escrito en C/C++.
+\end{itemize}
 
-Invocar código originalmente escrito en Python desde un programa escrito en
-C/C++. Esto se conoce como "embeber el intérprete".
+% TODO gráficos de embeber vs. extender?
 
 Cuando extendemos el intérprete, el programa principal es el intérprete de
 Python que adquiere, a través de este mecanismo, la posibilidad de realizar
 llamadas a módulos escritos en C/C++. Esto brinda principalmente dos
 beneficios: por un lado, delegar parte de la computación en código de mejor
-performance (procesamiento numérico, imágenes). y, por otro, la posibilidad de
+performance (procesamiento numérico, imágenes) y, por otro, la posibilidad de
 realizar llamadas a las APIs del sistema en forma directa. Esta es una de las
 formas en que muchos módulos propios de Python están escritos (ver [32]).
 
@@ -848,17 +880,18 @@ Nuestro objetivo sería poder escribir código Python como el siguiente:
 
 \inputminted{Python}{codelistings/square_usage.py}
 
-Cuando el código Python invoca la función square tienen que ocurrir 3 cosas:
+Cuando el código Python invoca la función square tienen que ocurrir tres cosas:
 
-% TODO: crear lista
+\begin{enumerate}
+    \item El parámetro 2, que es un objeto Python debe ser convertido al tipo
+\verb!int!.
 
-El parámetro 2, que es un objeto Python debe ser convertido al tipo \verb!int!.
+    \item El parámetro debe ser pasado a la función y el CPU debe ejecutar el
+código binario generado a partir del código fuente C.
 
-El parámetro debe ser pasado a la función y el CPU debe ejecutar el código
-binario generado a partir del código fuente C.
-
-El valor de retorno (un \verb!int! con el valor 4) debe ser convertido a un objeto
-Python.
+    \item El valor de retorno (un \verb!int! con el valor 4) debe ser
+convertido a un objeto Python.
+\end{enumerate}
 
 Para comprender por qué esto es así, debemos recordar en primer lugar que
 Python es un lenguaje interpretado. El código fuente debe ser convertido en una
@@ -899,21 +932,18 @@ El siguiente es un ejemplo completo de cómo sería la implementación de nuestr
 
 \inputminted{c}{codelistings/module.c}
 
-Notar que la función square ahora tiene los tipos que exporta el archivo de
-encabezados \verb!Python.h!. Notar también que, además de la definición de la
-función, se escribe código extra que representa la definición del módulo donde
-esta función vive.
+Notar que la función \verb!square! ahora tiene los tipos que exporta el archivo
+de encabezados \verb!Python.h!. Notar también que, además de la definición de
+la función, se escribe código extra que representa la definición del módulo
+donde esta función vive.
 
 Si bien los detalles de compilación varían de acuerdo a las características del
 sistema (lo cual no es relevante en este momento), así podríamos producir un
-archivo "example.so" que puede ser importado como librería desde el intérprete:
+archivo \verb!example.so! que puede ser importado como librería desde el
+intérprete:
 
 \begin{minted}[linenos=false]{text}
-# g++ -O3 -Wall -fPIC \
-    -I/usr/local/include \
-    -I/usr/include/Python3.6m \
-    -c example.cpp \
-    -o out.o
+# g++ -O3 -Wall -fPIC -I/usr/local/include -I/usr/include/Python3.6m -c example.cpp -o out.o
 # g++ -shared out.o -L/usr/local/lib -o example.so
 
 # Python3
@@ -929,7 +959,7 @@ de las tareas de esta aplicación será la de inicializar (y finalizar) un
 intérprete a través del cual pueda acceder a la funcionalidad desarrollada en
 Python. El siguiente ejemplo, tomado de la documentación oficial, da muestra de
 este enfoque. Supongamos que contamos con la siguiente definición de función
-hecha en Python y almacenada en el archivo "mul.py":
+hecha en Python y almacenada en el archivo \verb!mul.py!:
 
 \inputminted{Python}{codelistings/multiply.py}
 
@@ -945,7 +975,7 @@ sistema, pero algo parecido a
 # g++ cal.o -lPython3.6m -o cal
 \end{minted}
 
-genera un binario llamado "cal", que permite hacer lo siguiente:
+genera un binario llamado \verb!cal!, que permite hacer lo siguiente:
 
 \begin{minted}[linenos=false]{text}
 # ./cal mul multiply 12 4
@@ -960,7 +990,7 @@ la segunda, del archivo C.
 
 Ahora que contamos con marco de referencia para pensar las interacciones entre
 C/C++ y Python, podemos plantearnos la pregunta: ¿cuál de los dos enfoques es
-el apropiado para nuestro objetivo de extender OMNeT++ usando Python?
+el apropiado para nuestro objetivo de extender \omnetpp{} usando Python?
 
 Al extender (enfoque del tipo 1) el programa principal es el intérprete de
 Python, que hace uso de código escrito en otro lenguaje. Al embeber el
@@ -970,42 +1000,43 @@ acceder a funcionalidad escrita en este lenguaje. Sin duda, este último parece
 más alineado con lo que queremos realizar. No obstante, ambos enfoques son
 necesarios:
 
-Debemos extender el intérprete con clases escritas en C++: tal como se mencionó
-anteriormente, los usuarios deben heredar de \verb!cSimpleModule! para
-especificar el funcionamiento de sus módulos. El sistema sólo acepta módulos
-que son subclases de aquella. Si esta tarea de especificación ha de realizarse
-en Python, como nos proponemos, entonces es menester habilitar la escritura de
-algo como from omnetpp import \verb!cSimpleModule! para comenzar a definir los
-módulos a partir de dicha clase base. Se sigue que al menos parte del código de
-OMNeT++ debe ser expuesto al mundo de Python.
+\begin{description}
+    \item[Debemos extender el intérprete de Python] para que usuarios puedan
+heredar de \verb!cSimpleModule! al especificar el funcionamiento de sus
+módulos. El sistema sólo acepta módulos que son subclases de aquella. Si esta
+tarea de especificación ha de realizarse en Python, como nos proponemos,
+entonces es menester habilitar la escritura de algo como from omnetpp import
+\verb!cSimpleModule! para comenzar a definir los módulos a partir de dicha
+clase base. Se sigue que al menos parte del código de \omnetpp{} debe ser
+expuesto al mundo de Python.
 
-Debemos embeber el intérprete de Python en OMNeT++: queremos que la aplicación
-principal siga siendo el binario de simulación que se obtiene al compilar un
-proyecto tradicional de OMNeT++. Si esto no fuera así, deberíamos reescribir,
-entre otras cosas, el código de la interfaz de usuario de las simulaciones.
-Para conservar toda esa funcionalidad, queremos que el binario que genera
-OMNeT++ cambie lo menos posible, pero que entre esos cambios se encuentre la
-capacidad de cargar módulos y ejecutar clases escritas en Python. Esto impone
-la necesidad de inicializar y finalizar un intérprete de Python (a su debido
-tiempo).
-
-% TODO: imagen
+    \item[Debemos embeber el intérprete de Python en \omnetpp{}] para que la
+aplicación principal siga siendo el binario de simulación que se obtiene al
+compilar un proyecto tradicional de \omnetpp{}. Si esto no fuera así,
+deberíamos reescribir, entre otras cosas, el código de la interfaz de usuario
+de las simulaciones.  Para conservar toda esa funcionalidad, queremos que el
+binario que genera \omnetpp{} cambie lo menos posible, pero que entre esos
+cambios se encuentre la capacidad de cargar módulos y ejecutar clases escritas
+en Python. Esto impone la necesidad de inicializar y finalizar un intérprete de
+Python (a su debido tiempo).
+\end{description}
 
 Esto plantea dos desafíos, que son el núcleo del trabajo realizado:
 
-¿Cómo intervenir el proyecto OMNeT++ de forma que instancie y ejecute un
-intérprete de Python embebido en él? (cómo lograr embeber el intérprete)
-
-¿Cómo exponer al intérprete de Python toda la funcionalidad preexistente en las
-librerías de simulación, para que el usuario pueda escribir módulos simples en
-Python? (cómo lograr extender el intérprete con las clases de OMNeT++).
+\begin{enumerate}
+    \item ¿Cómo exponer al intérprete de Python toda la funcionalidad
+preexistente en las librerías de simulación, para que el usuario pueda escribir
+módulos simples en Python?
+    \item ¿Cómo intervenir el proyecto \omnetpp{} de forma que instancie y
+ejecute un intérprete de Python embebido en él?
+\end{enumerate}
 
 \subsubsection{Herramientas de más alto nivel para lograr la integración}
 
 Como se aprecia en los ejemplos de código provistos hasta el momento (extensión
-e intérprete embebido), la tarea no es trivial, a pesar de tratarse apenas de
-funciones pequeñas con argumentos de tipos básicos. Es de esperar grados de
-complejidad mucho mayores cuando el código involucra estructuras más
+e intérprete embebido), la tarea dista de ser trivial, a pesar de tratarse
+apenas de funciones pequeñas con argumentos de tipos básicos. Es de esperar
+grados de complejidad mucho mayores cuando el código involucre estructuras más
 sofisticadas del lenguaje (funciones con número variable de argumentos,
 argumentos con nombre, argumentos con valor por defecto, manejo de errores y
 excepciones, clases, etc.).
@@ -1015,15 +1046,13 @@ una función ad-hoc con el sólo objetivo de exponerla en Python, muchas veces s
 busca exponer en Python varios miles de líneas de código que nunca fueron
 hechos con este objetivo en mente, donde cada función, cada clase, debe ser
 envuelta con una capa que traduzca los argumentos con los tipos que envía el
-"mundo" de Python en argumentos de C++ y viceversa (con los valores de
+``mundo'' de Python en argumentos de C++ y viceversa (con los valores de
 retorno).
 
 Un ejemplo de esta problemática puede encontrarse en la generación de los
 bindings para Python de OpenCV (librería hecha en C++, especializada en
 algoritmos de procesamiento de imágenes). En How OpenCV-Python bindings are
 generated? [33] leemos:
-
-% TODO quote
 
 \begin{quotation}
 In OpenCV, all algorithms are implemented in C++. But these algorithms can be
@@ -1043,31 +1072,34 @@ necesario para exponer las clases y funciones al intérprete.
 Existen en el ecosistema de la creación de bindings y wrappers varios proyectos
 que buscan resolver este problema de forma más genérica. Algunos de ellos son:
 
-swig [34]: herramienta para la generación de código mediante el cual se puede
-conectar una aplicación hecha en C o C++ con una variedad de lenguajes de
-programación. Típicamente se utiliza para parsear el código en C o C++ y
+\begin{itemize}
+    \item swig [34]: herramienta para la generación de código mediante el cual
+se puede conectar una aplicación hecha en C o C++ con una variedad de lenguajes
+de programación. Típicamente se utiliza para parsear el código en C o C++ y
 proveer el código necesario para exponerlo en el lenguaje de destino.
 
-boost.Python [35]: librería hecha en C++ con el objetivo de proveer integración
-entre C++ y Python. Facilita la tarea de exponer proyectos hechos en C++ como
-módulos de Python disminuyendo la cantidad de código que el usuario debe
-escribir para generar los bindings. Hay que mencionar que es una pequeña parte
-de un proyecto mucho más abarcativo formado por numerosas librerías para C++.
+    \item boost.Python [35]: librería hecha en C++ con el objetivo de proveer
+integración entre C++ y Python. Facilita la tarea de exponer proyectos hechos
+en C++ como módulos de Python disminuyendo la cantidad de código que el usuario
+debe escribir para generar los bindings. Hay que mencionar que es una pequeña
+parte de un proyecto mucho más abarcativo formado por numerosas librerías para
+C++.
 
-pybind11 [36]: Comparte el objetivo (y mucha de la sintaxis) con boost.Python.
-Intenta diferenciarse de aquella en que es una librería formada enteramente por
-encabezados (archivos .h). Su código es más escueto y en ocasiones permite
-simplificar la sintaxis en relación a boost.Python. 
+    \item pybind11 [36]: Comparte el objetivo (y mucha de la sintaxis) con
+boost.Python.  Intenta diferenciarse de aquella en que es una librería formada
+enteramente por encabezados (archivos .h). Su código es más escueto y en
+ocasiones permite simplificar la sintaxis en relación a boost.Python. 
 
-binder [37]: Intenta solucionar la generación automática del código necesario
-para exponer C++ a Python utilizando la librería pybind11.
+    \item binder [37]: Intenta solucionar la generación automática del código
+necesario para exponer C++ a Python utilizando la librería pybind11.
 
-cpppy [38][39]: Haciendo uso de las librerías del proyecto LLVM permite
-ejecutar código C++ desde Python sin la necesidad de generación previa de
-bindings ni del uso de un lenguaje intermedio. El código en C++ se provee
+    \item cpppy [38][39]: Haciendo uso de las librerías del proyecto LLVM
+permite ejecutar código C++ desde Python sin la necesidad de generación previa
+de bindings ni del uso de un lenguaje intermedio. El código en C++ se provee
 directamente como strings a funciones que producen LLVM IR (LLVM Intermediate
 Representation, una especie de assembly que usa LLVM antes de pasar a código
 máquina de una arquitectura específica) y se compila en tiempo de ejecución.
+\end{itemize}
 
 Para dar idea al lector del tipo de beneficio que se obtiene al emplear estas
 herramientas, se provee a continuación una reimplementación del segundo ejemplo
@@ -1085,9 +1117,7 @@ El siguiente código en C++, en el archivo cal.cpp
 puede ser compilado con
 
 \begin{minted}[linenos=false]{text}
-# g++ -O3 -Wall -std=c++11 -fPIC \
-    `Python3 -m pybind11 --includes` \
-    cal.cpp -o cal -lPython3.6m
+# g++ -O3 -Wall -std=c++11 -fPIC `Python3 -m pybind11 --includes` cal.cpp -o cal -lPython3.6m
 \end{minted}
 
 y ejecutado
@@ -1106,10 +1136,10 @@ por resultar la más sencilla de utilizar y por ser su documentación muy
 completa. Por otro lado, como se puede apreciar en el repositorio oficial [41],
 resulta ser un proyecto activamente mantenido y con mucho uso en la comunidad.
 
-Si bien resulta muy atractivo el proyecto "binder" y su promesa de generar
+Si bien resulta muy atractivo el proyecto binder y su promesa de generar
 código para exponer el proyecto usando pybind11 de forma automática, el
 objetivo de este trabajo no fue nunca la automatización del proceso de
-escritura de las librerías, si no encontrar una manera de extender OMNeT++
+escritura de las librerías, si no encontrar una manera de extender \omnetpp{}
 utilizando Python.
 
 El proyecto cpppy resulta muy atractivo por el hecho de no tener que escribir
@@ -1119,7 +1149,7 @@ actividad y su documentación no es tan clara y extensa.
 \subsubsection{Entorno de trabajo}
 
 La primera etapa del trabajo consistió en familiarizarse con el código de
-OMNeT++. Para ello se procedió a descargar su código fuente del repositorio
+\omnetpp{}. Para ello se procedió a descargar su código fuente del repositorio
 público que se encuentra en github. Al momento de comenzar el trabajo, la
 última versión estable era la 5.5.1.
 
@@ -1128,9 +1158,9 @@ ello se siguieron las instrucciones provistas en la documentación del proyecto
 y en numerosas fuentes web.
 
 Para facilitar la repetición de esta experiencia (así como el uso de la versión
-modificada de OMNeT++ que permitiera una integración con Python) se utilizó
+modificada de \omnetpp{} que permitiera una integración con Python) se utilizó
 desde un principio el desarrollo dentro de contenedores Docker. Se procedió a
-la definición de una imagen base que tuviera todas las dependencias de OMNeT++
+la definición de una imagen base que tuviera todas las dependencias de \omnetpp{}
 preinstaladas y que permitiera fijar la versión de todos y cada uno de los
 componentes involucrados (compilador, librerías, Python, etc.). Esta fue una
 decisión muy acertada que permitió no sólo la repetibilidad de los resultados,
@@ -1142,41 +1172,48 @@ control casi total del entorno de desarrollo.
 El siguiente es un listado de los principales componentes de software que
 intervinieron en el desarrollo de este trabajo:
 
-OMNeT++ 5.5.1
+\begin{itemize}
+    \item \omnetpp{} 5.5.1
 
-Linux 1902cc2cffcf 5.3.0-29-generic
+    \item Linux 1902cc2cffcf 5.3.0-29-generic
 
-Ubuntu 18-10 (Cosmic)
+    \item Ubuntu 18-10 (Cosmic)
 
-g++ (Ubuntu 8.3.0-6ubuntu1~18.10.1) 8.3.0
+    \item g++ (Ubuntu 8.3.0-6ubuntu1~18.10.1) 8.3.0
 
-GNU Make 4.2.1
+    \item GNU Make 4.2.1
 
-Python 3.6.8
+    \item Python 3.6.8
 
-pybind11 2.4.3
+    \item pybind11 2.4.3
+\end{itemize}
 
 En una etapa final del proyecto se diseñaron mecanismos para probar nuestro
-código contra distintas versiones de OMNeT++ y se comenzó a utilizar Ubuntu
+código contra distintas versiones de \omnetpp{} y se comenzó a utilizar Ubuntu
 19.10 con Python 3.7.5, sin dificultades observables.
 
 \subsubsection{Caso de estudio}
-La documentación oficial de OMNeT++ provee un tutorial en siete partes que va
-complejizando gradualmente una simulación llamada "tictoc" [40]. De esta forma
+La documentación oficial de \omnetpp{} provee un tutorial en siete partes que va
+complejizando gradualmente una simulación llamada ``tictoc'' [40]. De esta forma
 se busca que los nuevos usuarios puedan familiarizarse con las funcionalidades
 principales que ofrece la herramienta.
 
-La simulación "tictoc" (si bien conoce variaciones a lo largo del tutorial)
+La simulación ``tictoc'' (si bien conoce variaciones a lo largo del tutorial)
 consiste esencialmente en una red con dos módulos (llamados tic y toc) que
-intercambian un mismo mensaje ad infinitum.
+intercambian un mismo mensaje ad infinitum (ver fig.~\ref{fig:tictoc}).
 
-% TODO imagen
+\begin{figure}[h]
+\caption{Ejecución gráfica de la simulación ``tictoc''.}
+\label{fig:tictoc}
+\centering
+\includegraphics[width=\textwidth]{tictoc}
+\end{figure}
 
 Por la sencillez inicial y la complejidad incremental de esta simulación, se
 usó como guía de todas las pruebas. Se estableció como primer objetivo poder
 escribir los módulos del tutorial tictoc en Python. Esto permitió concentrarse
 en las necesidades generales que permitieran la integración funcional de
-OMNeT++ con las clases escritas en Python.
+\omnetpp{} con las clases escritas en Python.
 
 Sólo una vez que se consiguió el objetivo primario, se prosiguió ampliando la
 integración para permitir la implementación de módulos de mayor complejidad. En
@@ -1184,8 +1221,8 @@ una segunda etapa, la mayoría de las muestras en el directorio samples fueron
 portadas a Python. Asimismo, se implementaron en Python algunos trabajos
 prácticos de la cátedra Redes y Sistemas Distribuidos de FaMAF.
 
-\section{Desarrollo}
-\subsection{Arquitectura de OMNeT++}
+\section{Desarrollo}\label{sec:des}
+\subsection{Arquitectura de \omnetpp{}}
 
 Tomemos como punto de partida la siguiente definición de módulo simple en C++
 (obviando la implementación de los métodos que no son relevantes en este
@@ -1197,7 +1234,7 @@ Luego de compilar de dicho modelo junto al kernel de simulación, el binario
 logra crear instancias del módulo \verb!Txc1! (tantas como los archivos NED
 indiquen en la descripción de la topología de la red) e invocar a sus métodos.
 Nuestro próximo objetivo es entender los mecanismos puestos en juego por
-OMNeT++ para lograr esto. Se exponen a continuación los principales elementos
+\omnetpp{} para lograr esto. Se exponen a continuación los principales elementos
 que contribuyen a entender la solución encontrada.
 
 \subsubsection{El ciclo de vida de una simulación}
@@ -1211,43 +1248,41 @@ nuevamente pasando los argumentos de invocación del programa.
 Esta función presenta tres etapas claramente señaladas mediante comentarios en
 el código:
 
-SETUP (preparación): procesamiento de la configuración, instanciación de una
-interfaz de usuario (gráfica o de consola).
+\begin{enumerate}
+    \item SETUP (preparación): procesamiento de la configuración, instanciación
+de una interfaz de usuario (gráfica o de consola).
 
-RUN (ejecución): el entorno creado (qtenv, o cmdenv o tkenv) es efectivamente
-puesto a correr. Los tres tipos de ambientes comparten mucho código y terminan
-llamando a código común en una clase base para correr la simulación. Aquí se
-consumen los eventos (mensajes) que los módulos van generando y enviando. Si se
-acaban los eventos o se acaba el tiempo designado para la simulación, esta
-finaliza.
+    \item RUN (ejecución): el entorno creado (qtenv, o cmdenv o tkenv) es
+efectivamente puesto a correr. Los tres tipos de ambientes comparten mucho
+código y terminan llamando a código común en una clase base para correr la
+simulación. Aquí se consumen los eventos (mensajes) que los módulos van
+generando y enviando. Si se acaban los eventos o se acaba el tiempo designado
+para la simulación, esta finaliza.
 
-SHUTDOWN (finalización): limpieza final, antes de devolver el valor de retorno
-de la simulación.
+    \item SHUTDOWN (finalización): limpieza final, antes de devolver el valor
+de retorno de la simulación.
+\end{enumerate}
 
 Nos interesa particularmente lo que ocurre en las etapas de SETUP y SHUTDOWN,
 por lo que podemos obviar los llamados que ocurren en RUN. El siguiente esquema
 permite entender mejor lo expuesto y dónde estamos poniendo el foco de
 atención.
 
-% TODO imagen
-
 \subsubsection{Code fragments: ejecución de código genérico}
 
-\verb!CodeFragments! es una clase definida en include/omnetpp/onstartup.h e
-implementada en src/sim/onstartup.cc.
+Existe en \omnetpp{} una clase denominada \verb!CodeFragments!, la cual
+analizamos a continuación.
 
 Una instancia de \verb!CodeFragments! se inicializa con dos argumentos:
 
-un puntero a una función de tipo \verb!void -> void!.
-
-una instancia de un tipo enumerado que representa cuándo debe ser ejecutada tal
-función:
-
-\verb!CodeFragments::STARTUP! para designar a las funciones a correr durante la
-etapa de preparación
-
-\verb!CodeFragments::SHUTDOWN! para designar a las funciones a correr durante
-la etapa de finalización
+\begin{enumerate}
+    \item un puntero a una función de tipo \verb!void -> void!.
+    \item una instancia de un tipo enumerado que representa cuándo debe ser ejecutada tal función:
+    \begin{itemize}
+        \item \verb!CodeFragments::STARTUP! para designar a las funciones a correr durante la etapa de preparación
+        \item \verb!CodeFragments::SHUTDOWN! para designar a las funciones a correr durante la etapa de finalización
+    \end{itemize}
+\end{enumerate}
 
 A su vez, \verb!CodeFragments! tiene atributos de clase (\verb!head! y
 \verb!next!) que sirven para implementar una lista enlazada global. Cada vez
@@ -1255,69 +1290,69 @@ que se inicializa una variable de tipo \verb!CodeFragments! esta se coloca como
 cabeza de la lista y almacena un puntero al siguiente elemento (la última de
 las instancias que se crearon antes que ella), es decir que se inserta por
 delante y hace crecer la lista.  Esta estructura de datos se conoce como
-"stack" o pila.
+``stack'' o pila.
 
 Existe también la función de clase \verb!CodeFragments::executeAll!, que toma
 un tipo (ya sea \verb!CodeFragments::STARTUP! o \verb!CodeFragments::SHUTDOWN!)
-y recorre toda la lista, ejecutando las funciones de aquellos CodeFragments que
-tienen el tipo especificado.
+y recorre toda la lista, ejecutando las funciones de aquellos
+\verb!CodeFragments! que tienen el tipo especificado.
 
-En \verb!setupUserInterface! se ejecuta:
+Cerca del inicio de la simulación, durante la estapa de STARTUP se ejecuta
 
 \begin{minted}[linenos=false]{c++}
 CodeFragments::executeAll(CodeFragments::STARTUP);
 \end{minted}
 
-casi al comienzo, y
+mientras que cerca del final de la simulación, durante la etapa de SHUTDOWN, se ejecuta:
 
 \begin{minted}[linenos=false]{c++}
 CodeFragments::executeAll(CodeFragments::SHUTDOWN);
 \end{minted}
 
-justo antes del final.
-
-Este es un detalle fundamental cuya importancia se revelará más adelante.
-
-% TODO imagen
+Este es un dato muy importante, ya que nos proveerá un mecanismo para manejar el ciclo de vida del intérprete de Python embebido,
+lo cual será abordado en la sección~\ref{subsec:interpreterlifecycle}
 
 \subsubsection{El registro global de clases}
 
-A la hora de construir la red para lanzar la simulación, OMNeT++ va creando
+A la hora de construir la red para lanzar la simulación, \omnetpp{} va creando
 recursivamente los módulos y sus submódulos a partir de su nombre (proveniente
 de los archivos NED). Es necesario pasar de un simple string como \verb!"Txc1"!
 o \verb!"Tictoc"! a un objeto de la clase apropiada.
 
-Para tal fin, OMNeT++ cuenta con la clase \verb!cRegistrationList!, la cual
+Para tal fin, \omnetpp{} cuenta con la clase \verb!cRegistrationList!, la cual
 implementa un mapeo de tipo \verb!std::string -> omnetpp::cOwnedObject*!. Para
 lograr que tal mapeo sea único y que sea accesible desde cualquier punto del
 programa, la clase \verb!cGlobalRegistrationList! implementa una variación del
-patrón de diseño conocido como "singleton". En efecto, no hay una única
+patrón de diseño conocido como ``singleton''. En efecto, no hay una única
 instancia de \verb!cRegistrationList!, si no que hay una especializada para
 cada tipo de objeto. En particular, existe una de estas
-\verb!cGlobalRegistrationLists! llamada classes donde se mapea de nombres de
-tipos (por ej, \verb!"Txc1"!, \verb!"Tictoc"!, etc.) a instancias de
+\verb!cGlobalRegistrationLists! llamada \verb!classes! donde se mapea de
+nombres de tipos (por ej, \verb!"Txc1"!, \verb!"Tictoc"!, etc.) a instancias de
 \verb!omnetpp::cObjectFactory!.
 
 ¿Qué es un \verb!cObjectFactory!? Cada instancia de \verb!cObjectFactory! sabe
 cómo crear objetos de un tipo determinado. Almacena una función de creación,
 una función de casteo y una descripción en forma de string.
 
-Poniendo todas estas piezas juntas, lo que OMNeT++ hace para obtener una
+Poniendo todas estas piezas juntas, lo que \omnetpp{} hace para obtener una
 instancia de un módulo, en la etapa de construcción de la red (se omite el
 manejo de errores):
 
-llama al método de clase \verb!cObjectFactory::createOne(className)!
+\begin{itemize}
+    \item llama al método de clase \verb!cObjectFactory::createOne(className)!
 
-el método de clase busca en el \verb!cGlobalRegistrationList! llamado classes a el
-\verb!cObjectFactory! apropiado para tal nombre de clase
+    \item el método de clase busca en el \verb!cGlobalRegistrationList! llamado
+classes a el \verb!cObjectFactory! apropiado para tal nombre de clase
 
-una vez identificado el \verb!cObjectFactory! adecuado, se llama a la función de
-creación que este contiene.
+    \item una vez identificado el \verb!cObjectFactory! adecuado, se llama a la
+función de creación que este contiene.
+
+\end{itemize}
 
 Todo este andamiaje es transparente para el usuario. Su única responsabilidad
 es definir un módulo que herede de \verb!cSimpleModule!, y presentarlo al
 sistema mediante \verb!Define_Module!. Todos estos detalles sobre cómo hace
-OMNeT++ para instanciar su clase están ocultos.
+\omnetpp{} para instanciar su clase están ocultos.
 
 Es importante descubrir, entonces, quién provee el \verb!cObjectFactory! que
 sabe construir y castear instancias del módulo definido por el usuario, y
@@ -1326,9 +1361,9 @@ además, quién registra ese \verb!cObjectFactory! en la instancia global de
 
 \subsubsection{El macro \texttt{Define\_Module}}
 
-Luego de la definición de la clase Txc1, para su uso en una simulación es
-mandatorio escribir \verb!Define_Module(Txc1);!. Sin esta instrucción, OMNeT++
-simplemente no toma conocimiento del módulo agregado por el usuario.
+Luego de la definición de la clase \verb!Txc1!, para su uso en una simulación
+es mandatorio escribir \verb!Define_Module(Txc1);!. Sin esta instrucción,
+\omnetpp{} simplemente no toma conocimiento del módulo agregado por el usuario.
 
 \verb!Define_Module! parece a simple vista una función, sin embargo es un
 macro, cuya definición luce así:
@@ -1349,23 +1384,23 @@ convirtiéndose en:
 
 Analicemos un poco el resultado.
 
-\verb!static omnetpp::cObject *__factoryfunc_13()!: define una "factory
-function", encargada de la creación de nuevas instancias de \verb!Txc1!.
+\verb!static omnetpp::cObject *__factoryfunc_13()!: define una ``factory
+function'', encargada de la creación de nuevas instancias de \verb!Txc1!.
 
 \verb!static void *__castfunc_13(omnetpp::cObject *obj)!: define una función de
 casteo, que a partir de un puntero a una instancia de \verb!omnetpp::cObject!
 devuelve el resultado de reinterpretar ese puntero como un puntero a instancia
 de \verb!Txc1!.
 
-\verb!void __onstartup_func_13()!: define una función que registra ante OMNeT++
+\verb!void __onstartup_func_13()!: define una función que registra ante \omnetpp{}
 la existencia de un nuevo tipo de módulo simple llamado \verb!Txc1!, junto con
 las funciones de creación y casteo definidas ad hoc.
 
-Se hace notar que los nombres incluyen el número "13" porque en el archivo
+Se hace notar que los nombres incluyen el número ``13'' porque en el archivo
 original, \verb!Define_Module(Txc1)!; estaba escrito en la línea 13. Con esto
 se busca diferenciar funciones en el potencial caso de tener diversos usos del
 macro \verb!Define_Module! en el mismo archivo. Efectivamente encontramos que,
-de ejecutarse la función \verb!__onstartup_func_13!, OMNeT++ pasaría a tener
+de ejecutarse la función \verb!__onstartup_func_13!, \omnetpp{} pasaría a tener
 conocimiento de un módulo llamado \verb!"Txc1"! y contaría con un mecanismo
 para crear instancias del mismo.
 
@@ -1378,73 +1413,86 @@ Esto es una declaración e inicialización de una variable estática de tipo
 \verb!omnetpp::CodeFragments! llamada \verb!__onstartup_obj_13! (si bien el
 nombre es irrelevante). Al tratarse de una variable estática, su inicialización
 ocurre al comenzar la ejecución del programa. Es decir que antes de que la
-función main sea invocada, esta llamada a constructor ya se ejecutó y por lo
-tanto la instancia de \verb!CodeFragments! que se acaba de crear ya se encuentra
-formando parte de la lista global de \verb!CodeFragments!. Por lo tanto, el resultado
-final de la instanciación de esta variable es la colocación de
-\verb!__onstartup_func_13!  de para ser ejecutada durante la etapa de STARTUP
-de la función \verb!setupUserInterface!. Más aún, cuando esa función se ejecute, el
-resultado es que se registra ante OMNeT++ un tipo de módulo simple nuevo (\verb!Txc1!) así
-como las funciones necesarias para su creación y casteo. Esto permitirá a
-OMNeT++ crear y manipular instancias de \verb!Txc1! cuando sea necesario (según lo
-dicten los archivos de descripción de la topología de la red).En resumidas
-palabras, el macro \verb!Define_Module(T)! (donde \verb!T! es la clase definida por el
-usuario) sirve para:
+función \verb!main! sea invocada, esta llamada a constructor ya se ejecutó y
+por lo tanto la instancia de \verb!CodeFragments! que se acaba de crear ya se
+encuentra formando parte de la lista global de \verb!CodeFragments!. Por lo
+tanto, el resultado final de la instanciación de esta variable es la colocación
+de \verb!__onstartup_func_13!  de para ser ejecutada durante la etapa de
+STARTUP de la función \verb!setupUserInterface!. Más aún, cuando esa función se
+ejecute, el resultado es que se registra ante \omnetpp{} un tipo de módulo
+simple nuevo (\verb!Txc1!) así como las funciones necesarias para su creación y
+casteo. Esto permitirá a \omnetpp{} crear y manipular instancias de \verb!Txc1!
+cuando sea necesario (según lo dicten los archivos de descripción de la
+topología de la red).
 
-definir una función (F1) de creación de objetos del tipo \verb!T!
+En resumidas palabras, el macro \verb!Define_Module(T)!  (donde \verb!T! es la
+clase definida por el usuario) sirve para:
 
-definir una función (F2) de casteo a objetos del tipo \verb!T!
+\begin{enumerate}
+    \item definir una función (F1) de creación de objetos del tipo \verb!T!
 
-definir una función (F3) que registra ante OMNeT++ el tipo \verb!T! junto con
-las funciones F1 y F2.
+    \item definir una función (F2) de casteo a objetos del tipo \verb!T!
 
-definir una variable de tipo \verb!CodeFragments! que al ser estática se
-inicializa antes de llamar a la función principal del programa. Esto último
+    \item definir una función (F3) que registra ante \omnetpp{} el tipo
+\verb!T! junto con las funciones F1 y F2.
+
+    \item definir una variable de tipo \verb!CodeFragments! que al ser estática
+se inicializa antes de llamar a la función principal del programa. Esto último
 garantiza que F3 se ejecuta durante la etapa de STARTUP de
 \verb!setupUserInterface! y, como consecuencia, cuando llega el momento de
-instanciar a la clase \verb!Txc1!, OMNeT++ ya puede hacerlo.
+instanciar a la clase \verb!Txc1!, \omnetpp{} ya puede hacerlo.
+
+\end{enumerate}
 
 \subsection{Registrando módulos Python}
 
-Luego de conocer el ciclo de vida de la simulación en OMNeT++, los mecanismos
+Luego de conocer el ciclo de vida de la simulación en \omnetpp{}, los mecanismos
 que se activan a la hora de declarar un módulo escrito por el usuario (puestos
 en juego por el macro \verb!Define_Module!) así como el andamiaje provisto por
 \verb!CodeFragments! y las llamadas
-\verb!CodeFragments::executeAll(CodeFragments::STARTUP);!,
-\verb!CodeFragments::executeAll(CodeFragments::SHUTDOWN);!  que realiza la
-función \verb!setupUserInterface!, se empieza a definir una estrategia para la
-implementación de módulos directamente en Python.
+
+\begin{minted}[linenos=false]{c++}
+CodeFragments::executeAll(CodeFragments::STARTUP);
+
+CodeFragments::executeAll(CodeFragments::SHUTDOWN);
+\end{minted}
+
+\noindent que realiza la función \verb!setupUserInterface!, se empieza a definir una
+estrategia para la implementación de módulos directamente en Python.
 
 En una primera etapa, buscamos definir una serie de funciones y definiciones
 que hagan en su conjunto lo mismo que el macro anteriormente estudiado.
 Convertir todo ese código en un macro lo más sencillo posible sería bueno (para
 la comodidad del usuario), pero por el momento se posterga.
 
-En resumidas cuentas, buscamos:
+Buscamos:
 
-Una función que al ser invocada (sin argumentos) devuelva un puntero a una
-instancia de \verb!PySimpleModule! convertido a puntero a instancia de
+\begin{itemize}
+    \item Una función que al ser invocada (sin argumentos) devuelva un puntero
+a una instancia de \verb!PySimpleModule! convertido a puntero a instancia de
 \verb!cModule!.
 
-Una función de casteo a objetos del tipo \verb!PySimpleModule!.
+    \item Una función de casteo a objetos del tipo \verb!PySimpleModule!.
 
-Una función que sea registrada (como un \verb!CodeFragment!) para ser ejecutada
-durante la etapa de SETUP de \verb!setupUserInterface! para registrar este
-nuevo tipo ante OMNeT++. 
+    \item Una función que sea registrada (como un \verb!CodeFragment!) para ser
+ejecutada durante la etapa de SETUP de \verb!setupUserInterface! para registrar
+este nuevo tipo ante \omnetpp{}. 
 
-A su vez, es necesario inyectar en el ciclo de vida de OMNeT++ la
+\end{itemize}
+
+A su vez, es necesario inyectar en el ciclo de vida de \omnetpp{} la
 inicialización y finalización del intérprete de Python.
 
 Por último, es necesario que el usuario pueda especificar clases en Python
 heredando de una clase base que sea la versión Python de \verb!cSimpleModule!,
-de forma de poder realizar los casteos a los tipos de C++ que espera OMNeT++.
+de forma de poder realizar los casteos a los tipos de C++ que espera \omnetpp{}.
 
 \subsubsection{\texttt{PySimpleModule}: heredando \texttt{cSimpleModule} en Python}
 
 Comenzamos a trabajar en extender el intérprete de Python con las clases de
-OMNeT++. En una primera etapa se trabajó en exponer sólo aquello que era
+\omnetpp{}. En una primera etapa se trabajó en exponer sólo aquello que era
 estrictamente necesario para lograr la implementación de la primera parte del
-tutorial "tictoc": las clases \verb!cSimpleModule! con los métodos
+tutorial tictoc: las clases \verb!cSimpleModule! con los métodos
 \verb!getName! y \verb!send!, y la clase \verb!cMessage!.
 
 También fue en esta etapa en que se trabajó efectivamente con pybind11 por lo
@@ -1471,20 +1519,17 @@ fuera del contexto de una simulación:
 >>> from pyopp import cSimpleModule, cMessage
 >>> sm = cSimpleModule()
 >>> sm.handleMessage(cMessage('hello'))
-<!> Error during startup/shutdown: Global simtime_t variable found, with value
-0. Global simtime_t variables are forbidden, because scale exponent is not yet
-known at the time they are initialized. Please use double or const_simtime_t
-instead. Aborting.
+<!> Error during startup/shutdown: Global simtime_t variable found, with value 0. Global simtime_t variables are forbidden, because scale exponent is not yet known at the time they are initialized. Please use double or const_simtime_t instead. Aborting.
 \end{minted}
 
 No obstante, ya contamos con la extensión necesaria para que el código escrito
-por el usuario herede en Python de la clase cSimpleModule (escrita en C++). A
-continuación exploramos cómo integrar estas clases en una simulación.
+por el usuario herede en Python de la clase \verb!cSimpleModule! (escrita en
+C++). A continuación exploramos cómo integrar estas clases en una simulación.
 
 \subsubsection{Creación de módulos definidos en Python desde C++}
 
-Para lograr que OMNeT++ sepa cómo instanciar esta clase definida en Python el
-paso siguiente fue definir la "factory function" necesaria. Una primera versión
+Para lograr que \omnetpp{} sepa cómo instanciar esta clase definida en Python el
+paso siguiente fue definir la factory function necesaria. Una primera versión
 de la misma luce así:
 
 \inputminted{c++}{codelistings/factory_function.cc}
@@ -1494,7 +1539,7 @@ motivos. El primero de ellos es la conversión intermedia a
 \verb!cSimpleModule!, necesaria porque C++ y pybind11 no conocen la relación
 entre nuestra clase definida en Python y \verb!cObject!. En una futura versión,
 en la que el módulo expuesto a Python incluye toda la jerarquía de clases base
-de \verb!cSimpleModule! (la cual tiene a cObject en la raíz), este paso
+de \verb!cSimpleModule! (la cual tiene a \verb!cObject! en la raíz), este paso
 intermedio puede eliminarse.
 
 El segundo motivo, mucho más complejo y difícil de resolver es que al terminar
@@ -1506,15 +1551,18 @@ variables.
 Recordemos que en C++, los principales lugares donde las variables pueden
 existir son:
 
-el stack (manejo automático): son las variables declaradas sin manejo explícito
-de la memoria y son liberadas tan pronto como salen de scope (el bloque de
-código que las contiene). Para alojar una variable en el stack, el compilador
-debe conocer su tamaño. Además, el espacio del stack es bastante limitado.
+\begin{description}
+    \item[el stack (manejo automático):] variables declaradas sin manejo
+explícito de la memoria y son liberadas tan pronto como salen de scope (el
+bloque de código que las contiene). Para alojar una variable en el stack, el
+compilador debe conocer su tamaño. Además, el espacio del stack es bastante
+limitado.
 
-el heap (manejo manual): Una fuente mucho mayor de memoria, administrada por el
-sistema operativo. Las variables cuya memoria se pide y se devuelve
-explícitamente tienen un ciclo de vida independiente del stack y el compilador
-no necesita conocer su tamaño.
+    \item[el heap (manejo manual):] una fuente mucho mayor de memoria,
+administrada por el sistema operativo. Las variables cuya memoria se pide y se
+devuelve explícitamente tienen un ciclo de vida independiente del stack y el
+compilador no necesita conocer su tamaño.
+\end{description}
 
 Naturalmente, Python aloja todos los objetos creados por el usuario en el heap.
 A su vez, con el propósito de liberar la memoria de aquellas variables que ya
@@ -1536,14 +1584,14 @@ b[0] = 'chau'
 a = 1
 \end{minted}
 
-el objeto de tipo string \verb!'hola'! que el intérprete de Python alojó en
-memoria dinámica ya no es necesario, puesto que no existen referencias a él. No
-hay manera de que el programa vuelva a utilizarlo. Es susceptible de ser
-eliminado para devolver la memoria al sistema operativo.
+\noindent el objeto de tipo string \verb!'hola'! que el intérprete de Python
+alojó en memoria dinámica ya no es necesario, puesto que no existen referencias
+a él. No hay manera de que el programa vuelva a utilizarlo. Es susceptible de
+ser eliminado para devolver la memoria al sistema operativo.
 
 El algoritmo que el intérprete utiliza para reconocer este tipo de situaciones
 (cuándo es momento de destruir un objeto y devolver su memoria) se conoce como
-"reference counting". Básicamente consiste en incrementar la cuenta cada vez
+``reference counting''. Básicamente consiste en incrementar la cuenta cada vez
 que se crea una referencia y decrementarla cuando se destruye o sobreescribe
 una referencia. Cuando la cuenta se vuelve cero el objeto se puede borrar. No
 existen garantías de que el objeto sea borrado inmediatamente, pero el garbage
@@ -1560,7 +1608,7 @@ Tan pronto como la variable \verb!obj! (que apunta a un objeto Python en el
 heap pero está en el stack) sale de scope y es destruida, el intérprete
 reconoce que ya no hay variables apuntando a dicho objeto (desconoce el casteo
 a \verb!cSimpleModule*! o \verb!cObject*!) y lo borra (devuelve la memoria al
-sistema operativo). Por su lado, el programa OMNeT++ continúa utilizando la
+sistema operativo). Por su lado, el programa \omnetpp{} continúa utilizando la
 referencia \verb!ret! que ahora apunta a memoria que es del sistema operativo.
 Tan pronto como trate de dereferenciarla, tendremos un \verb!Segmentation Fault!
 y el sistema operativo terminará el programa.
@@ -1575,7 +1623,7 @@ referencias de forma manual antes de que termine la función.
 \end{minted}
 
 Esto evita que el intérprete devuelva la memoria al sistema operativo y permite
-que OMNeT++ utilice la referencia devuelta por la función sin incurrir en un
+que \omnetpp{} utilice la referencia devuelta por la función sin incurrir en un
 comportamiento ilegal.
 
 Sin embargo, esto genera un problema simétrico: ahora el objeto Python no será
@@ -1596,7 +1644,7 @@ objeto C++ que se está borrando es un wrapper a un objeto Python. Al llegar a
 cero la cuenta de referencias de dicho objeto, el wrapper debe ser eliminado
 también. Este sería el comportamiento correcto si el programa principal fuera
 Python y se están invocando librerías escritas en C++. En nuestro caso, es un
-"double delete" o un segundo intento de borrar el objeto.
+``double delete'' o un segundo intento de borrar el objeto.
 
 Borrar un objeto que ya ha sido borrado y cuya memoria ya ha sido devuelta al
 sistema operativo es lo mismo que intentar borrar (liberar) una porción de
@@ -1609,16 +1657,19 @@ liberado.
 
 En resumidas cuentas, el problema se solucionó aplicando las siguientes reglas:
 
-La cuenta de referencias del objeto Python creado en la factory function que
-será llamada por OMNeT++ debe ser incrementada manualmente, para evitar que el
-intérprete decida liberar su memoria tan pronto como la función retorna.
+\begin{enumerate}
+    \item La cuenta de referencias del objeto Python creado en la factory
+function que será llamada por \omnetpp{} debe ser incrementada manualmente,
+para evitar que el intérprete decida liberar su memoria tan pronto como la
+función retorna.
 
-Cuando OMNeT++ libera el objeto C++ que en realidad es el wrapper de un objeto
-Python, la cuenta de referencias del objeto Python debe ser decrementada para
-permitir que su memoria sea liberada.
+    \item Cuando \omnetpp{} libera el objeto C++ que en realidad es el wrapper
+de un objeto Python, la cuenta de referencias del objeto Python debe ser
+decrementada para permitir que su memoria sea liberada.
 
-Pybind11 no debe eliminar el objeto C++ que envuelve al objeto Python cuando
-este último sea liberado.
+    \item Pybind11 no debe eliminar el objeto C++ que envuelve al objeto Python
+cuando este último sea liberado.
+\end{enumerate}
 
 Este problema del ciclo de vida de los objetos volverá a aparecer más adelante
 con los mensajes que se crean en un módulo con destino a otro módulo. El
@@ -1656,13 +1707,13 @@ sido implementado en Python heredando de \verb!cSimpleModule!. No sirve para
 identificar las clases derivadas en Python.
 
 No obstante, no seguimos trabajando en una función de casteo más elaborada por
-considerarlo innecesario. Inspeccionando el código de OMNeT++ se puede
+considerarlo innecesario. Inspeccionando el código de \omnetpp{} se puede
 constatar que la función \verb!isInstance! se llama sólamente para validar el
 tipo del tercer argumento de la función cComponent::emit. Dicho tercer
 argumento es de tipo \verb!cObject*! y tiene como valor por defecto nullptr. No
 encontramos ejemplo de su uso en la documentación ni en ninguno de los samples.
 
-\subsubsection{Ciclo de vida del intérprete}
+\subsubsection{Ciclo de vida del intérprete}\label{subsec:interpreterlifecycle}
 
 Resta proveer un mecanismo que asegure que un intérprete de Python está vivo
 durante el tiempo que esto es estrictamente necesario. Es decir, desde antes de
@@ -1682,17 +1733,22 @@ class InterpreterManager {
 \end{minted}
 
 La implementación de \verb!ensureInterpreter! simplemente valida que
-interpreter sea un puntero nulo (lo cual sirve para identificar la primera vez
-que llaman a la función).
+\verb!interpreter! sea un puntero nulo (lo cual sirve para identificar la
+primera vez que llaman a la función).
 
 Una solución alternativa podría ser agregar la línea
-\verb!pybind11::scoped_interpreter guard{};! al comienzo de la función
-\verb!main! de OMNeT++.  Esta solución no nos seduce porque queremos dejar el
-código original de OMNeT++ lo más intacto posible.
+
+\begin{minted}[linenos=false]{c++}
+pybind11::scoped_interpreter guard{};
+\end{minted}
+
+\noindent al comienzo de la función \verb!main! de \omnetpp{}.  Esta solución
+no nos seduce porque queremos dejar el código original de \omnetpp{} lo más
+intacto posible.
 
 \subsubsection{Juntando todas las piezas}
 
-En resumidas cuentas, este es el código que hay que escribir para que OMNeT++
+En resumidas cuentas, este es el código que hay que escribir para que \omnetpp{}
 levante nuestra implementación del módulo desde un archivo Python:
 
 \inputminted{c++}{codelistings/omnetpy.cc}
@@ -1717,36 +1773,34 @@ asume que el mismo importable (esto es, \verb!import txc! no produce errores).
 \subsection{Generalización}
 
 Con el desarrollo presentado hasta aquí en esta sección, queda logrado el
-objetivo de hacer que OMNeT++ instancie clases definidas en Python y las acepte
+objetivo de hacer que \omnetpp{} instancie clases definidas en Python y las acepte
 como implementación de módulos de una simulación. El trabajo hecho para
 extender el intérprete (exponer las clases de C++ como módulos Python) incluyó
 lo mínimo necesario para poder correr las versiones más simples del tutorial
-oficial "tictoc". 
+oficial tictoc. 
 
 A continuación, se prosiguió escribiendo en Python el resto del tutorial
 tictoc. Este tutorial tiene unas 17 simulaciones progresivamente más complejas
 (aún sobre la idea de dos módulos que se intercambian el mismo mensaje).
 
-En cada nueva iteración se fueron agregando nuevas funcionalidades que debían
-ser expuestas a Python (es decir, los bindings debían ser extendidos para
-incluir más código de OMNeT++ y hacerlo accesible desde Python).
+En cada iteración se fueron agregando nuevas funcionalidades que debían ser
+expuestas a Python (es decir, los bindings debían ser extendidos para incluir
+más código de \omnetpp{} y hacerlo accesible desde Python).
 
 Algunas nuevas funcionalidades se resolvieron simplemente agregando una
 definición en el módulo de los bindings, otras presentaron desafíos mayores
 (borrado de mensajes, logging).
 
-Poco a poco, los principales features de OMNeT++ fueron soportados en un módulo
+Poco a poco, los principales features de \omnetpp{} fueron soportados en un módulo
 Python:
 
-recolección de parámetros desde los archivos de configuración
-
-logging (el macro \verb!EV!)
-
-emisión de señales
-
-manipulación de gráficos en la UI
-
-\verb!WATCH!
+\begin{itemize}
+    \item recolección de parámetros desde los archivos de configuración
+    \item logging (el macro \verb!EV!)
+    \item emisión de señales
+    \item manipulación de gráficos en la UI
+    \item \verb!WATCH!
+\end{itemize}
 
 Luego de concluir las simulaciones propuestas en el tutorial tictoc se comenzó
 a implementar en Python las simulaciones provistas en el directorio samples
@@ -1754,22 +1808,23 @@ a implementar en Python las simulaciones provistas en el directorio samples
 herramienta). Esto permitió seguir ampliando la superficie de código expuesta a
 Python.
 
-Asimismo, se encontraron algunas limitaciones para las cuales no se
-encontró una solución. Esto se explica en la sección "Limitaciones".
+Asimismo, se encontraron algunas limitaciones para las cuales no se encontró
+una solución, las cuales se encuentran detalladas en la
+sección~\ref{subsec:lim}.
 
-\subsubsection{Mas allá de cSimpleModule y cMessage}
+\subsubsection{Mas allá de \texttt{cSimpleModule} y \texttt{cMessage}}
 
-Las clases de OMNeT++ más elementales para una simulación son las dos
+Las clases de \omnetpp{} más elementales para una simulación son las dos
 mencionadas en el título. \verb!cSimpleModule! es la clase que el usuario debe
 extender para construir sus agentes de simulación, y \verb!cMessage! es la clase
 utilizada para producir eventos que empujen el desarrollo de la simulación.
 Estas son las únicas clases empleadas en las primeras versiones del tutorial
-"tictoc" y, por lo tanto, fueron las primeras que se expusieron a Python en una
+tictoc y, por lo tanto, fueron las primeras que se expusieron a Python en una
 primera etapa exploratoria. Una vez que se vio que el enfoque adoptado fue
 exitoso, se procedió a exponer a Python una mayor superficie de la librería de
-simulación de OMNeT++. Qué exponer y en qué orden fue organizado en torno a
+simulación de \omnetpp{}. Qué exponer y en qué orden fue organizado en torno a
 desarrollar en Python los mismos ejemplos que se proveen en el directorio
-"samples" del proyecto original. Esto permitió también ir comparando los
+\verb!samples! del proyecto original. Esto permitió también ir comparando los
 resultados de las simulaciones hechas en C++ con las simulaciones hechas en
 Python.
 
@@ -1778,23 +1833,25 @@ enriquecer notablemente el rango de posibilidades de la librería \verb!pyopp!
 (el binding expuesto a Python), añadiendo funcionalidad esencial para un
 simulador de eventos discretos:
 
-recolección de métricas (clases \verb!cStatistic!, \verb!cStdDev!,
+\begin{itemize}
+    \item recolección de métricas (clases \verb!cStatistic!, \verb!cStdDev!,
 \verb!cAbstractHistogram!, \verb!cHistogram!, \verb!cHistogramStrategy!,
 \verb!cOutVector!),
 
-acceso al tiempo de simulación (clase \verb!cSimTime!),
+    \item acceso al tiempo de simulación (clase \verb!cSimTime!),
 
-manipulación de la representación gráfica de la simulación (clases
+    \item manipulación de la representación gráfica de la simulación (clases
 \verb!cCanvas!, \verb!cDisplayString!)
 
-parametrización de experimentos (clase \verb!cPar!)
+    \item parametrización de experimentos (clase \verb!cPar!)
 
-cambios dinámicos en la organización del modelo (clase \verb!cTopology!,
-\verb!cGate!, \verb!cChannel!, \verb!cDataRateChannel!)
+    \item cambios dinámicos en la organización del modelo (clase
+\verb!cTopology!, \verb!cGate!, \verb!cChannel!, \verb!cDataRateChannel!)
+\end{itemize}
 
-\subsubsection{El macro \texttt{EV}}
+\subsubsection{El macro \texttt{EV}}\label{subsec:ev}
 
-Existe en OMNeT++ algo que luce como un objeto (aunque es en realidad un macro)
+Existe en \omnetpp{} algo que luce como un objeto (aunque es en realidad un macro)
 que sirve para generar mensajes desde el código. Estos mensajes se verán en la
 interfaz gráfica de la simulación en un tablero especial destinado a tal fin.
 
@@ -1804,13 +1861,27 @@ Por ejemplo, el siguiente código (samples/aloha/Host.cc):
 EV << "generating packet " << pkname << endl;
 \end{minted}
 
-produce este efecto en la simulación (atención a la sección inferior derecha):
+\noindent produce este efecto en la simulación (ver sección inferior derecha de
+la fig.~\ref{fig:aloha_EV}).
 
-% TODO imagen
+\begin{figure}[h]
+\caption{Uso de \texttt{EV} en simulación aloha}
+\label{fig:aloha_EV}
+\centering
+\includegraphics[width=\textwidth]{aloha_EV}
+\end{figure}
 
 Este macro hace mucho más que simplemente aceptar una cadena de caracteres:
 captura el contexto de quién envía el mensaje, de forma que en la interfaz
-gráfica se pueden filtrar mensajes por su origen:
+gráfica se pueden filtrar mensajes por su origen, como se aprecia en la
+figura~\ref{fig:aloha_filter}
+
+\begin{figure}[h]
+\caption{Filtrado de mensajes}
+\label{fig:aloha_filter}
+\centering
+\includegraphics[width=6cm]{aloha_filter}
+\end{figure}
 
 % TODO imagen
 
@@ -1829,11 +1900,11 @@ EV << "generating packet " << pkname << '\n'
 
 Este objeto EV se hace cargo de investigar el stack de Python para descubrir
 quién emitió el mensaje y crear así un objeto usando la verdadera API de
-OMNeT++ (oculta al usuario de \verb!omnetpy!, para simplificar).
+\omnetpp{} (oculta al usuario de \verb!omnetpy!, para simplificar).
 
 \subsubsection{\texttt{WATCH}: inspección del estado desde la GUI}
 
-\verb!WATCH! es otra herramienta de OMNeT++ que apunta a facilitar la
+\verb!WATCH! es otra herramienta de \omnetpp{} que apunta a facilitar la
 trazabilidad de las simulaciones. Se trata de un mecanismo que permite declarar
 interés en observar permanentemente el estado de cierta variable o cierto
 atributo de un módulo. Suponiendo que existe la variable \verb!counter!, su uso
@@ -1844,11 +1915,16 @@ WATCH(counter)
 \end{minted}
 
 Para acceder a la información de la variable en tiempo real desde el entorno
-gráfico de la simulación, podemos seleccionar el menú Inspect, comando Find /
-Inspect objects, y utilizar los filtros disponibles hasta dar con lo que nos
-interesa, como se muestra a continuación:
+gráfico de la simulación, podemos seleccionar \ui{Inspect $\rightarrow$ Find /
+Inspect objects}, y utilizar los filtros disponibles hasta dar con lo que nos
+interesa, como se muestra en la figura~\ref{fig:tictoc_inspect}.
 
-% TODO imagen
+\begin{figure}[h]
+\caption{Inspección de objetos}
+\label{fig:tictoc_inspect}
+\centering
+\includegraphics[width=10cm]{tictoc_inspect}
+\end{figure}
 
 Esta funcionalidad también se expuso a Python, con la sola diferencia de que
 hay que pasar un string con el nombre de la variable que queremos monitorear:
@@ -1862,9 +1938,11 @@ WATCH('counter')
 Los datos generados durante una simulación (los sucesivos tiempos de arribo, de
 demora, paquetes perdidos, paquetes corruptos, etc.) pueden ser recolectados:
 
-como pares de (tiempo, valor) como una serie temporal
-
-como valores atemporales, utilizados para calcular media, varianza, etc.
+\begin{itemize}
+    \item como pares de (tiempo, valor) como una serie temporal
+    \item como valores atemporales, utilizados para calcular media, varianza,
+etc.
+\end{itemize}
 
 Estos datos son recogidos ya sea en cada invocación del método
 \verb!handleMessage!, o bien en el método \verb!finish!, el cual se suele
@@ -1879,7 +1957,7 @@ Las clases necesarias para esta actividad (\verb!cHistogram!,
 
 \subsubsection{El mecanismo de las señales}
 
-OMNeT++ provee un mecanismo más refinado para la recolección de estadísticas
+\omnetpp{} provee un mecanismo más refinado para la recolección de estadísticas
 dentro de una simulación, que permite remover de los módulos el código
 específico para registrar los datos en variables o archivos, así como calcular
 las diversas medidas de interés antes de finalizar la simulación. Esto brinda
@@ -1944,7 +2022,7 @@ Sobreescritura de los valores por defecto (qué recolectar y qué ignorar)
 
 Esta funcionalidad también se expuso en la librería de Python.
 
-\subsection{Limitaciones y dificultades}
+\subsection{Limitaciones y dificultades}\label{subsec:lim}
 
 En esta sección se detallan algunos problemas encontrados durante el desarrollo
 del proyecto. Algunos de los mismos no han sido solucionados o su solución
@@ -1952,24 +2030,24 @@ siempre pareció pasajera.
 
 \subsubsection{Ciclo de vida de un mensaje}
 
-Un mensaje dentro de una simulación OMNeT++ es una instancia de \verb!cMessage!
+Un mensaje dentro de una simulación \omnetpp{} es una instancia de \verb!cMessage!
 (u otra clase derivada de \verb!cMessage!, como \verb!cPacket! o cualquier
 clase definida por el usuario que tenga a cMessage entre sus clases base).
 
-El mensaje no sólo es importante en tanto y en cuanto permite "desarrollar la
-acción" dentro de una simulación, sino que también es el combustible que hace
-avanzar el código del kernel de OMNeT++. En efecto, cuando un módulo ejecuta su
-método send, el mensaje se encola como un evento a ser procesado por el kernel
-de la simulación. Cuando no hay más eventos que procesar, la simulación
-termina.
+El mensaje no sólo es importante en tanto y en cuanto permite ``desarrollar la
+acción'' dentro de una simulación, sino que también es el combustible que hace
+avanzar el código del kernel de \omnetpp{}. En efecto, cuando un módulo ejecuta
+su método \verb!send!, el mensaje se encola como un evento a ser procesado por
+el kernel de la simulación. Cuando no hay más eventos que procesar, la
+simulación termina.
 
-Existe en OMNeT++ cierto protocolo en relación a quién se hace cargo de
+Existe en \omnetpp{} cierto protocolo en relación a quién se hace cargo de
 destruir los mensajes (liberar su memoria). En cualquier momento, todo mensaje
 tiene un \textit{dueño} (puede ser el módulo que lo está creando, el propio
 kernel de la simulación, el módulo que lo recibe). Es el dueño del mensaje el
 único habilitado para liberar su memoria.
 
-Cualquier intento de salirse de este protocolo es penado por OMNeT++: se paga
+Cualquier intento de salirse de este protocolo es penado por \omnetpp{}: se paga
 con la finalización temprana de una simulación. En el otro extremo, si al
 llegar a la finalización de una simulación resulta que hay mensajes que nadie
 ha borrado, el sistema emite por pantalla numerosas advertencias de que nadie
@@ -1991,7 +2069,7 @@ nuestro ejemplo habitual:
 Es claro que la variable local msg es la única referencia al mensaje creado. Al
 finalizar esta función, el algoritmo de conteo de referencias de Python actuará
 y se eliminará el objeto. Esto ocasionará el borrado del objeto que existe del
-lado de C++. En este momento, OMNeT++ se quejará de que el mensaje aún no debía
+lado de C++. En este momento, \omnetpp{} se quejará de que el mensaje aún no debía
 ser borrado, dado que este está en el kernel de la simulación. Fin del
 programa.
 
@@ -2000,14 +2078,17 @@ de la clase \verb!cMessage! cuyo inicializador guarda una referencia extra al ob
 en un objeto externo denominado \verb!RefStore !(almacén de referencias). De esta
 forma, cada vez que se crea un mensaje existen a él dos referencias:
 
-la referencia local (como la variable \verb!msg! en el ejemplo anterior),
+\begin{itemize}
+    \item la referencia local (como la variable \verb!msg! en el ejemplo
+anterior),
 
-la referencia extra almacenada en \verb!RefStore! por el constructor de
-\verb!cMessage!.
+    \item la referencia extra almacenada en \verb!RefStore! por el constructor
+de \verb!cMessage!.
+\end{itemize}
 
-De este modo, al finalizar la función initialize la referencia local se pierde,
-pero el mensaje no es eliminado gracias a que aún existe una referencia (desde
-el punto de vista de Python). 
+De este modo, al finalizar la función \verb!initialize! la referencia local se
+pierde, pero el mensaje no es eliminado gracias a que aún existe una referencia
+(desde el punto de vista de Python). 
 
 Simétricamente, para realizar la tarea de limpieza y liberación definitiva del
 mensaje, agregamos a la clase \verb!cSimpleModule! (nuevamente, en Python) la
@@ -2015,36 +2096,37 @@ posibilidad de borrar esta referencia extra mediante el método delete que
 acepta un mensaje y trata de quitarlo del \verb!RefStore!, eliminando la última
 referencia existente.
 
-Este escenario (Python crea una variable, se la pasa a OMNeT++, OMNeT++ espera
-que esa referencia apunte a un objeto durante algún tiempo, Python borra el
-objeto apenas termina el bloque de código) se repite en algunos otros lugares.
-Allí donde se descubrió que esto sucedía, la solución fue implementar un
-wrapper en Python del método original para asegurar la existencia de una
+Este escenario (Python crea una variable, se la pasa a \omnetpp{}, \omnetpp{}
+espera que esa referencia apunte a un objeto durante algún tiempo, Python borra
+el objeto apenas termina el bloque de código) se repite en algunos otros
+lugares. Allí donde se descubrió que esto sucedía, la solución fue implementar
+un wrapper en Python del método original para asegurar la existencia de una
 referencia extra al objeto en cuestión. Esta no es la solución ideal, no
 obstante, porque a diferencia de lo que ocurre con los mensajes, otro tipo de
 objetos no suelen ser explícitamente eliminados en el código Python.
 
 \subsubsection{El método \texttt{deleteModule}}
 
-Existe en OMNeT++ la posibilidad de que un módulo se declare listo para ser
+Existe en \omnetpp{} la posibilidad de que un módulo se declare listo para ser
 eliminado de la red: debe ejecutar su método \verb!deleteModule!. Esto permite la
-creación de simulaciónes con una topología dinámica. El manejo que hace OMNeT++
+creación de simulaciónes con una topología dinámica. El manejo que hace \omnetpp{}
 de esta situación involucra un uso no trivial de excepciones en C++ como forma
 de control de flujo. Este método probó ser un verdadero desafío para ser
 portado y utilizado desde Python. Finalmente se excluyó de la lista de features
 portadas. Esto implica, por ejemplo, que no pudimos implementar el ejemplo
-llamado "dyna" en Python.
+llamado dyna en Python.
 
 \subsubsection{Automatización de la creación de bindings}
+
 El proceso de creación de bindings fue manual. En general, esta actividad se
 resistió a una automatización fácil por el hecho de que para cada método de
 cada clase expuesta a Python hubo que razonar sobre el uso de los parámetros,
 si se usaba paso por referencia o por valor, si Python debía hacerse cargo de
-borrar los argumentos o si OMNeT++ esperaba que estos siguieran vivos luego de
+borrar los argumentos o si \omnetpp{} esperaba que estos siguieran vivos luego de
 la llamada.
 
 Este proceso en sí es una limitación del proyecto, ya que es propenso a
-errores, es lento, y en cada nueva versión de OMNeT++ habría que hacer una
+errores, es lento, y en cada nueva versión de \omnetpp{} habría que hacer una
 revisión de todos las clases que se han agregado o que han sufrido alguna
 modificación en su interfaz.
 
@@ -2054,15 +2136,17 @@ suite de tests que hicieran uso del módulo Python generado, apuntando a tener
 100\% de cubrimiento.
 
 \subsubsection{Mayor cubrimiento de la librería original}
+
 Como se mencionó previamente, se eligió exponer a Python aquello que fue siendo
-necesario para migrar las simulaciones de ejemplo del directorio "samples" del
+necesario para migrar las simulaciones de ejemplo del directorio \verb!samples! del
 proyecto original. Esto no es el 100\% de la librería de simulación. Notar que
-tampoco es deseable exponer cada clase y cada función de OMNeT++ al mundo de
+tampoco es deseable exponer cada clase y cada función de \omnetpp{} al mundo de
 Python, sino sólo aquellas que un usuario podría llegar a requerir a la hora de
 hacer una simulación.
 
 \subsubsection{Depuración}
-El IDE de OMNeT++ habilita la compilación de las simulaciones con símbolos de
+
+El IDE de \omnetpp{} habilita la compilación de las simulaciones con símbolos de
 debugging (depuración). También permite también el seteo de puntos de debugging
 así como entrar a modo debugging si la aplicación termina inesperadamente. Las
 funciones de debugging (recorrer código, entrar a funciones, inspeccionar
@@ -2086,7 +2170,7 @@ debugger permitiera entrar al código Python utilizando pdb (y no gdb).
 \subsubsection{La función de casteo}
 
 Dentro del macro \verb!Define_Python_Module! se provee una función de casteo.
-Analizando el código de OMNeT++ se puede apreciar que esta se usa en última
+Analizando el código de \omnetpp{} se puede apreciar que esta se usa en última
 instancia para poder distinguir si un módulo es una instancia de nuestra clase
 o no. En el caso de los módulos definidos en Python, la función de casteo está
 devolviendo \verb!true! para todos. Si bien esto no nos trajo dificultades en la
@@ -2094,73 +2178,76 @@ implementación y ejecución de ninguna simulación, sería interesante desarrol
 una mejor función de casteo que permitiera reconocer diversas subclases de
 \verb!PycSimpleModule! implementadas en Python.
 
-\section{Omnetpy}
+\section{Omnetpy}\label{sec:omnetpy}
+
 \subsection{Arquitectura del proyecto}
 
 En una primera etapa de trabajo (particularmente durante de investigación de la
 arquitectura de software y la ejecución de una simulación) se re realizó
-bastante intervención sobre el código propio de OMNeT++ (con la finalidad de
+bastante intervención sobre el código propio de \omnetpp{} (con la finalidad de
 trazar llamadas, imprimir argumentos, etc). Naturalmente, el código propio de
 nuestro trabajo (nuevas definiciones, bindings) fue siendo añadido a la
-estructura de directorios propuesta por OMNeT++ (nuevos encabezados en el
+estructura de directorios propuesta por \omnetpp{} (nuevos encabezados en el
 directorio \verb!include!, nuevas fuentes en el directorio \verb!src!, etc).
-Con el objetivo de compilar OMNeT++ así como los Python bindings en el mismo
+Con el objetivo de compilar \omnetpp{} así como los Python bindings en el mismo
 proceso, también se realizaron modificaciones sobre el \verb!Makefile! de
 primer nivel.
 
 Con el tiempo, este enfoque fue dejando ver algunas limitaciones ya que las
-modificaciones que fueron hechas para OMNeT++ 5.5.1 no necesariamente se
+modificaciones que fueron hechas para \omnetpp{} 5.5.1 no necesariamente se
 dejaban aplicar de forma directa sobre otras versiones. En particular, nos
-interesó probar nuestros cambios sobre OMNeT++ 6, que incluye soporte para
+interesó probar nuestros cambios sobre \omnetpp{} 6, que incluye soporte para
 editar archivos Python directamente en el IDE (resaltado de sintaxis,
 autocompletado, etc.). Si bien no es imposible aplicar los cambios sobre otras
-versiones de OMNeT++, requiere supervisión manual. En particular, la edición
+versiones de \omnetpp{}, requiere supervisión manual. En particular, la edición
 del \verb!Makefile! (para forzar el compilado de nuestro código junto con el
 resto del proyecto) probó ser un mecanismo difícil de automatizar.
 
 Prácticamente estábamos obligados a seguir utilizando los Python bindings con
-la versión de OMNeT++ inicialmente elegida (5.5.1) o elegir para nuestro
-proyecto una estructura de versiones que fuera espejo de las de OMNeT++, y
+la versión de \omnetpp{} inicialmente elegida (5.5.1) o elegir para nuestro
+proyecto una estructura de versiones que fuera espejo de las de \omnetpp{}, y
 realizar adaptaciones particulares para cada una.
 
 Con el fin de simplificar el proceso de integración se comenzó a separar
 nuestro trabajo en un proyecto independiente que pudiera ser aplicado
-prácticamente sin cambios a distintas versiones de OMNeT++. Comenzamos a
-utilizar el término "omnetpy" para referirnos al conjunto de los archivos
+prácticamente sin cambios a distintas versiones de \omnetpp{}. Comenzamos a
+utilizar el término ``omnetpy'' para referirnos al conjunto de los archivos
 agregados por nosotros.
 
-\subsection{Separando omnetpy de OMNeT++}
+\subsection{Separando omnetpy de \omnetpp{}}
 
 Dado que nosotros controlamos el ambiente de trabajo de forma prácticamente
 total (mediante el uso de imágenes docker), aislar nuestros cambios y
 compilarlos de forma independiente en un proceso automático probó ser una tarea
 bastante sencilla y con beneficios inmediatos.
 
-En una primera etapa se compila el proyecto OMNeT++ (la versión elegida, no
+En una primera etapa se compila el proyecto \omnetpp{} (la versión elegida, no
 importa cuál sea) y luego se compila omnetpy.
 
 Esta es la estructura de directorios de nuestro proyecto:
 
-bindings: código para la generación de la librería Python pyopp
+\begin{itemize}
+    \item bindings: código para la generación de la librería Python pyopp
 
-bindings/pyopp: definición Python pura del módulo pyopp
+    \item bindings/pyopp: definición Python pura del módulo pyopp
 
-include: encabezados c++ (\verb!Define_Python_Module!, definición de
+    \item include: encabezados C++ (\verb!Define_Python_Module!, definición de
 \verb!PycSimpleModule!, definición de \verb!InterpreterManager!)
 
-lib: tras el proceso de compilación, aquí se deja la librería C++
+    \item lib: tras el proceso de compilación, aquí se deja la librería C++
 \verb!libomnetpy.so!. Esta debe enlazarse a cualquier binario que desee
-utilizar el macro \verb!Define_Python_Module!.
+    \item utilizar el macro \verb!Define_Python_Module!.
 
-src: código c++ (implementación de \verb!InterpreterManager!)
+    \item src: código C++ (implementación de \verb!InterpreterManager!)
+\end{itemize}
 
 Luego de esta separación, se probó con éxito la integración de nuestro código
-sobre diversas versiones de OMNeT++ (5.6.1, 6.0.pre6).
+sobre diversas versiones de \omnetpp{} (5.6.1, 6.0.pre6).
 
-Por supuesto, si una versión de OMNeT++ cambia la API de las clases que
+Por supuesto, si una versión de \omnetpp{} cambia la API de las clases que
 nosotros deseamos exponer a Python, nuestro código debe también ser diferente.
 No estamos tomando esas pequeñas diferencias en cuenta. Esto sí obligaría a
-generar Python bindings ajustados a cada versión de OMNeT++ (ya sea de forma
+generar Python bindings ajustados a cada versión de \omnetpp{} (ya sea de forma
 manual o automática).
 
 \subsection{El módulo \texttt{pyopp}}
@@ -2176,15 +2263,17 @@ del módulo hecho en C++.
 \subsection{Compilación del proyecto}
 
 El proyecto cuenta con algunos archivos escritos en C++ que necesitan ser
-compilados:
+compilados
 
-para la extensión del intérprete: estos archivos son compilados y enlazados con
-las librerías de desarrollo de Python, produciendo un módulo que se puede
-importar desde Python.
+\begin{description}
+    \item[para la extensión del intérprete:] estos archivos son compilados y
+enlazados con las librerías de desarrollo de Python, produciendo un módulo que
+se puede importar desde Python.
 
-para embeber el intérprete: estos archivos no son parte del módulo de
-extensión, si no que se encargan de que OMNeT++ inicialice un intérprete de
-Python antes de instanciar la primera clase definida en Python.
+    \item[para embeber el intérprete:] estos archivos no son parte del módulo
+de extensión, si no que se encargan de que \omnetpp{} inicialice un intérprete
+de Python antes de instanciar la primera clase definida en Python.
+\end{description}
 
 Estos archivos son compilados utilizando un \verb!Makefile! que resuelve todos
 los detalles de enlace, encabezados, flags necesarios, etc. Este paso, además,
@@ -2193,19 +2282,21 @@ desarrollar el trabajo.
 
 \subsection{Manual de usuario}
 
-El uso de OMNeT++ con omnetpy es muy similar a su uso sin omnetpy. Sólo hay que
+El uso de \omnetpp{} con omnetpy es muy similar a su uso sin omnetpy. Sólo hay que
 realizar algunos pasos extra, como por ejemplo:
 
-Escribir las clases derivadas de \verb!cSimpleModule! en Python
+\begin{itemize}
+    \item Escribir las clases derivadas de \verb!cSimpleModule! en Python
 
-Escribir un archivo C++ utilizando el macro \verb!Define_Python_Module!
+    \item Escribir un archivo C++ utilizando el macro
+\verb!Define_Python_Module!
 
-Asegurarse que al compilar el proyecto sean incluidos los encabezados de
-omnetpy (por ej, donde se define el macro mencionado).
+    \item Asegurarse que al compilar el proyecto sean incluidos los encabezados
+de omnetpy (por ej, donde se define el macro mencionado).
+\end{itemize}
 
 Se incluye a continuación una guía paso a paso que muestra al usuario cómo
-realizar una simulación usando OMNeT++ con omnetpy, desde el IDE (entorno de
-desarrollo integrado).
+realizar una simulación usando \omnetpp{} con omnetpy, desde el IDE.
 
 \subsubsection{Prerrequisitos}
 
@@ -2233,14 +2324,14 @@ Generar una imagen docker:
 make build
 \end{minted}
 
-En este punto se puede especificar la versión de OMNeT++ que se desea utilizar, por ejemplo:
+En este punto se puede especificar la versión de \omnetpp{} que se desea utilizar, por ejemplo:
 
 \begin{minted}[linenos=false]{text}
 OMNETPP_VERSION=5.6 make build
 \end{minted}
 
 Se espera que la versión sea descargable desde la página de releases de
-OMNeT++, de lo contrario, la creación de la imagen fallará. Consultar la lista
+\omnetpp{}, de lo contrario, la creación de la imagen fallará. Consultar la lista
 de versiones disponibles en https://github.com/omnetpp/omnetpp/releases
 
 Lanzar un contenedor:
@@ -2272,9 +2363,9 @@ docker run \
     mmodenesi/omnetpy:ub18.04_opp5.6.2 bash
 \end{minted}
 
-El nombre de la imagen anuncia qué versión de ubuntu y qué versión de OMNeT++
+El nombre de la imagen anuncia qué versión de ubuntu y qué versión de \omnetpp{}
 se utiliza. El ejemplo anterior está utilizando una imagen construida a partir
-de ubuntu:18.04 y con OMNeT++ 5.6.2.
+de ubuntu:18.04 y con \omnetpp{} 5.6.2.
 
 \subsubsection{Escribiendo una simulación con omnetpy}
 
@@ -2284,10 +2375,16 @@ Dentro del contenedor, lanzar el IDE
 omnetpp
 \end{minted}
 
-Nota: cuando levantamos el IDE por primera vez nos pregunta qué directorio
-utilizar como "workspace" por defecto
+Cuando levantamos el IDE por primera vez nos pregunta qué directorio
+utilizar como ``workspace'' por defecto, como se puede observar en la
+figura~\ref{fig:workspace}.
 
-% TODO imagen
+\begin{figure}[h]
+\caption{Selección de directorio de trabajo}
+\label{fig:workspace}
+\centering
+\includegraphics[width=10cm]{workspace}
+\end{figure}
 
 Se recomienda usar la ruta /home/userpp/workspace, ya que en general lanzamos
 contenedores docker donde esa ruta es un volumen (lo que hacemos desde el
@@ -2296,19 +2393,22 @@ vida útil del contenedor).
 
 \subsubsection{Preparando un nuevo proyecto}
 
-Desde el IDE, seleccionar File -> New -> OMNeT++ Project
+Desde el IDE, seleccionar \ui{File $\rightarrow$ New $\rightarrow$ OMNeT++
+Project} (fig.~\ref{fig:new_project}). Al aparecer el diálogo Wizard, ingresar
+\verb!pytictoc! como nombre del proyecto, seleccionar \ui{Empty project} y
+luego \ui{Finish}. Un nuevo proyecto aparecerá en el área de proyectos del IDE.
 
-% TODO imagen
-
-Al aparecer el diálogo Wizard, ingresar pytictoc como nombre del proyecto,
-seleccionar Empty project y luego Finish. Un nuevo proyecto aparecerá en el
-área de proyectos del IDE:
-
-% TODO imagen
+\begin{figure}[h]
+\caption{Creación de un nuevo proyecto}
+\label{fig:new_project}
+\centering
+\includegraphics[width=10cm]{new_project}
+\end{figure}
 
 \subsubsection{Agregando un archivo NED}
 
-Hacer click derecho en el proyecto y seleccionar New -> Network Description File (NED)
+Hacer click derecho en el proyecto y seleccionar \ui{New $\rightarrow$ Network
+Description File (NED)}.
 
 % TODO imagen
 
@@ -2318,8 +2418,8 @@ Guardarlo como \verb!pytictoc.ned! con el siguiente contenido:
 
 \subsubsection{Agregando un archivo C++}
 
-Hacer click derecho en el proyecto y seleccionar New -> File y guardarlo como
-\verb!txc.cc! con el siguiente contenido:
+Hacer click derecho en el proyecto y seleccionar \ui{New $\rightarrow$ File} y
+guardarlo como \verb!txc.cc! con el siguiente contenido:
 
 \inputminted{c++}{codelistings/tictoc.cc}
 
@@ -2328,13 +2428,13 @@ por el IDE, es esperable que se señalen errores en relación a su inclusión o 
 \verb!Define_Python_Module!. Para cambiar esto se debe agregar el directorio
 \verb!/home/userpp/omnetpy/include! a la lista de directorios escaneados en
 busca de archivos de encabezado. En la versión actual del IDE esto se logra en
-Project -> Properties -> C/C++ General -> Path and Symbols y clickeando el
-botón "Add".
+\ui{Project $\rightarrow$ Properties $\rightarrow$ C/C++ General $\rightarrow$
+Path and Symbols} y clickeando el botón \ui{Add}.
 
-\subsubsection{Agregando un archivo makefrag}
+\subsubsection{Agregando un archivo \texttt{makefrag}}
 
-Hacer click derecho en el proyecto, seleccionar New -> File y guardarlo como
-\verb!makefrag! con el siguiente contenido
+Hacer click derecho en el proyecto, seleccionar \ui{New $\rightarrow$ File} y
+guardarlo como \verb!makefrag! con el siguiente contenido:
 
 \begin{minted}[linenos=false]{text}
 INCLUDE_PATH += $(shell python3 -m pybind11 --include) -I$(OMNETPY_ROOT)/include
@@ -2342,17 +2442,21 @@ LIBS = -lomnetpy $(shell python3-config --libs | cut -d" " -f1)
 LDFLAGS += -L$(OMNETPY_ROOT)/lib
 \end{minted}
 
-Estas líneas van a ser incluidas en el archivo Makefile autogenerado por
-OMNeT++ para compilar la simulación. Es esencial que se llame makefrag.
+Estas líneas van a ser incluidas en el archivo \verb!Makefile! autogenerado por
+\omnetpp{} para compilar la simulación. Es esencial que se llame
+\verb!makefrag!.
 
-Nota importante: si la versión de Python es 3.8 o mayor, entonces
-\verb!python3-config --libs! debe reemplazarse por
+\begin{quotation}
+\noindent\textbf{Nota importante}: si la versión de Python es 3.8 o mayor,\\
+\verb!python3-config --libs!\\
+debe reemplazarse por\\
 \verb!python3-config --libs --embed!.
+\end{quotation}
 
 \subsubsection{Agregando un archivo Python}
 
-Hacer click derecho en el proyecto, seleccionar New -> File y guardarlo como
-\verb!txc.py! con el siguiente contenido:
+Hacer click derecho en el proyecto, seleccionar \ui{New $\rightarrow$ File} y
+guardarlo como \verb!txc.py! con el siguiente contenido:
 
 \inputminted{Python}{codelistings/tictoc.py}
 
@@ -2362,7 +2466,7 @@ En el panel del editor seleccionar el archivo \verb!txc.cc! (la fuente en C++).
 Esto es importante para forzar al IDE a ofrecernos la compilación de una
 simulación C++ en el siguiente paso.
 
-Seleccionar Run -> Run y elegir "OMNeT++ Simulation"
+Seleccionar \ui{Run $\rightarrow$ Run} y elegir \ui{OMNeT++ Simulation}
 
 % TODO imagen
 
@@ -2371,12 +2475,12 @@ simulación:
 
 % TODO imagen
 
-\section{Evaluación}
+\section{Evaluación}\label{sec:ev}
 
-Se procedió a verificar el funcionamiento de un modelo de OMNeT++ hecho en
-Python. Para realizar esta tarea se implementó la simulación de ejemplo "aloha"
-(parte de la distribución oficial de OMNeT++) en Python (la llamaremos
-"pyaloha").
+Se procedió a verificar el funcionamiento de un modelo de \omnetpp{} hecho en
+Python. Para realizar esta tarea se implementó la simulación de ejemplo aloha
+(parte de la distribución oficial de \omnetpp{}) en Python (la llamaremos
+pyaloha).
 
 Se puede mostrar teóricamente que para el protocolo de transmisión aloha el uso óptimo del
 canal ($\frac{1}{e}$, aproximadamente $18.4\%$) ocurre cuando se emite un paquete cada dos
@@ -2392,16 +2496,18 @@ inadvertidos en el modelo.
 
 Se ejecutó la simulación con los siguientes parámetros:
 
-número de hosts: 15
+\begin{itemize}
+    \item número de hosts: 15
 
-tasa de transmisión: 9600kbps
+    \item tasa de transmisión: 9600kbps
 
-tamaño de paquete: 952b
+    \item tamaño de paquete: 952b
 
-tiempo total de simulación: 60min
+    \item tiempo total de simulación: 60min
 
-tiempo entre paquetes: variable exponencial con media $\lambda$, donde $\lambda$ se
-hizo variar entre 0 y 15 (segundos)
+    \item tiempo entre paquetes: variable exponencial con media $\lambda$,
+donde $\lambda$ se hizo variar entre 0 y 15 (segundos)
+\end{itemize}
 
 Para el modelo original implementado en C++, se obtuvieron los siguientes
 resultados:
@@ -2409,7 +2515,7 @@ resultados:
 % TODO imagen
 
 Para el modelo pyaloha se obtuvieron los mismos resultados. No es que se
-obtuvieron resultados similares, se obtuvieron exactamente los mismos
+obtuvieron resultados similares: se obtuvieron exactamente los mismos
 resultados. Recordar que la inicialización del generador de números aleatorios
 utiliza la misma semilla, por lo que los eventos han sido generados en tiempos
 exactamente iguales, en ambos modelos.
@@ -2420,11 +2526,11 @@ como la implementación del modelo en C++.
 \subsection{Rendimiento}
 
 A continuación se presenta una comparación entre los modelos realizados con
-OMNeT++ (código en C++) y los mismos modelos escritos en Python, en términos de
+\omnetpp{} (código en C++) y los mismos modelos escritos en Python, en términos de
 velocidad de procesamiento. Las simulaciones se realizaron en una notebook con
 procesador Intel i7-1065G7 CPU @ 1.30GHz, con 8GB de memoria RAM. Sin embargo,
 los resultados se presentan en términos de eventos por segundo (una métrica que
-OMNeT++ escribe por salida estándar).
+\omnetpp{} escribe por salida estándar).
 
 \subsubsection{Aloha}
 
@@ -2461,28 +2567,29 @@ implementado como un macro. En este caso, la performance de C++ no se ve
 afectada, alcanzando también unos 5 millones de eventos por segundo. En cambio,
 el modelo que utiliza Python sólo alcanza unos 17.000 mensajes por segundos
 (unas 300 veces más lento). Esto se debe a que en Python, \verb!EV! no está
-llamando directamente a código C++ de OMNeT++ (que, como se dijo, es un macro y
-por lo tanto es expandido en tiempo de compilación) si no que es un objeto que
-inspecciona el stack para conocer el contexto. Esto fue detallado en una
-sección anterior.
+llamando directamente a código C++ de \omnetpp{} (que, como se dijo en la
+sección~\ref{subsec:ev}, es un macro y por lo tanto es expandido en tiempo de
+compilación) si no que es un objeto que inspecciona el stack para conocer el
+contexto.
 
 En efecto, si el modelo en C++ dice:
 
 \begin{minted}[linenos=false]{c++}
-EV << getName() << "'s counter is " << counter << ", sending back message\n";
+EV << getName() << "'s counter is " << counter << "\n";
 \end{minted}
 
-su traducción directa a Python resulta aproximadamente 1000 veces más lenta
-
-\begin{minted}[linenos=false]{Python}
-EV << self.getName() << "'s counter is " << self.counter << 'sending back message\n'
-\end{minted}
-
-mientras que la siguiente variante, aparentemente igual, es sólo 300 veces más
+\noindent su traducción directa a Python resulta aproximadamente 1000 veces más
 lenta
 
 \begin{minted}[linenos=false]{Python}
-EV << f"{self.getName()}'s counter is {self.counter} sending back message\n"
+EV << self.getName() << "'s counter is " << self.counter << '\n'
+\end{minted}
+
+\noindent mientras que la siguiente variante, aparentemente igual, es sólo 300
+veces más lenta
+
+\begin{minted}[linenos=false]{Python}
+EV << f"{self.getName()}'s counter is {self.counter}\n"
 \end{minted}
 
 La diferencia viene dada por el hecho de que la primera variante (la que es más
@@ -2495,21 +2602,21 @@ utiliza \verb!<<! una única vez.
 
 Como era de esperar, se encontró que los modelos implementados directamente en
 C++ se terminan de simular más rápidamente. No obstante, qué tanto más rápido
-no es un valor constante: la complejidad del método handleMessage dicta la
-magnitud de la penalidad en la performance. Esto es consistente con el hecho de
-que mientras más tiempo pase la simulación ejecutando instrucciones Python
+no es un valor constante: la complejidad del método \verb!handleMessage! dicta
+la magnitud de la penalidad en la performance. Esto es consistente con el hecho
+de que mientras más tiempo pase la simulación ejecutando instrucciones Python
 dentro del intérprete, más se aleja de la performance ideal alcanzada por un
 modelo que utilice sólo C++ la totalidad del tiempo.
 
 \subsection{Complejidad de código}
 
-La siguiente comparación entre modelos de OMNeT++ puro (C++) y OMNeT++
+La siguiente comparación entre modelos de \omnetpp{} puro (C++) y \omnetpp{}
 implementando modelos en Python se basa en la reimplementación de los
-siguientes ejemplos de muestra incluidos en el código fuente de OMNeT++: aloha,
-canvas, cqn, dyna,  fifo, histograms, hypercube, routing, tictoc.
+siguientes ejemplos de muestra incluidos en el código fuente de \omnetpp{}: aloha,
+canvas, cqn, dyna, fifo, histograms, hypercube, routing, tictoc.
 
 En ciertos fragmentos de código donde predomina la llamada a métodos y
-funciones de OMNeT++, los modelos en C++ y los modelos en Python son
+funciones de \omnetpp{}, los modelos en C++ y los modelos en Python son
 necesariamente casi idénticos, como se observa en el siguiente ejemplo:
 
 routing/builder/netbuilder.cc
@@ -2533,8 +2640,8 @@ complejidad de código: ausencia de caracteres como corchetes y punto y coma
 para estructurar el código, ausencia de calificación del nombre de espacios
 (\verb!Netbuilder::!).
 
-En líneas generales, los modelos de ejemplo que incluye OMNeT++ están diseñados
-para mostrar cómo trabajar con OMNeT++, lo cual hace que el código consista
+En líneas generales, los modelos de ejemplo que incluye \omnetpp{} están diseñados
+para mostrar cómo trabajar con \omnetpp{}, lo cual hace que el código consista
 principalmente en llamadas a las APIs y, por lo tanto, su implementación usando
 Python sea prácticamente igual en términos de cantidad de líneas.
 
@@ -2565,7 +2672,7 @@ routing/builder/netbuilder.cc
         // create module
         cModuleType *modtype = cModuleType::find(modtypename);
         if (!modtype)
-            throw cRuntimeError("module type `%s' for node `%s' not found", modtypename, name);
+            throw cRuntimeError("module type '%s' for node '%s' not found", modtypename, name);
         cModule *mod = modtype->create(name, parent);
         nodeid2mod[nodeid] = mod;
 
@@ -2594,7 +2701,7 @@ Python:
             # create module
             modtype = cModuleType.find(modtypename)
             if modtype is None:
-                raise RuntimeError(f'module type `{modtypename}' for node `{name}' not found')
+                raise RuntimeError(f'module type '{modtypename}' for node '{name}' not found')
 
             mod = modtype.create(name, parent)
             nodeid2mod[nodeid] = mod
@@ -2604,17 +2711,9 @@ Python:
 
 \end{minted}
 
-donde Python es más simple por
-
-no declaración de variables
-
-facilidad de lectura de archivos
-
-facilidad para manipulación de strings
-
-O, como vemos en el siguiente ejemplo, por la facilidad para trabajar con
-diccionarios:
-
+donde Python es más simple por no declaración de variables, la facilidad de
+lectura de archivos, la facilidad para manipulación de strings o, como vemos en
+el siguiente ejemplo, por la facilidad para trabajar con diccionarios:
 
 C++:
 
@@ -2634,28 +2733,43 @@ Python:
             mod.buildInside()
 \end{minted}
 
-En este contexto, se presenta la siguiente tabla que muestra la cantidad de
-archivos y la cantidad de líneas por archivo que tienen los modelos de muestra
-de C++ y sus respectivas versiones en Python.
+Como puede apreciarse en la tabla~\ref{table:loc}, la cantidad de líneas
+necesaria para implementar un modelo en Python siempre fue menor que para el
+modelo original en C++.  En el análisis se tienen en cuenta únicamente archivos
+\verb!.h!, \verb!.cc!, \verb!.msg! y \verb!.py!.
 
-En el análisis se tienen en cuenta únicamente archivos \verb!.h!, \verb!.cc!,
-\verb!.msg! y \verb!.py!.
+\begin{table}[h!]
+\centering
+\begin{tabular}{l|rrr}
+Modelo & C++ & Python & Proporción\\
+\hline
 
-% todo tabla
+aloha     & 511  & 352  & 68,88\% \\
+canvas    & 145  & 114  & 78,62\% \\
+cqn       & 185  & 100  & 54,05\% \\
+dyna      & 401  & 291  & 72,57\% \\
+fifo      & 285  & 122  & 42,81\% \\
+histogram & 158  & 139  & 87,97\% \\
+hypercube & 368  & 263  & 71,47\% \\
+routing   & 551  & 370  & 67,15\% \\
+tictoc    & 1755 & 705  & 40,17\% \\
+\end{tabular}
+\caption{Cantidad de líneas de código en modelos reimplementados en Python}
+\label{table:loc}
+\end{table}
 
 Además de las características ya mencionadas que hacen de Python un lenguaje
 más simple de manejar, los modelos implementados en Python tienen menos
 archivos y menos líneas.
 
-\section{Conclusiones}
-Se presenta una extensión del simulador de eventos discreto OMNeT++ que permite
+\section{Conclusiones}\label{sec:conc}
+Se presenta una extensión del simulador de eventos discreto \omnetpp{} que permite
 escribir módulos simples en el lenguaje de programación Python. Esto habilita a
 la escritura de modelos de simulación sin necesidad de saber programar en el
-lenguaje oficial de OMNeT++, es decir, C++.
+lenguaje oficial de \omnetpp{}, es decir, C++.
 
 C++ es un lenguaje de programación que provee pocas abstracciones sobre el
 hardware subyacente y que se compila para obtener un binario ejecutable
-directamente en el procesador. No obstante, las mismas características que lo
 convierten en herramienta muy poderosa para escribir código de alta performance
 (administración manual de la memoria, complejo sistema de tipos, posibilidad de
 incluir código assembly), hacen de este un lenguaje de difícil dominio y con
@@ -2671,7 +2785,7 @@ relacionadas a la computación. Los programas en Python no se compilan, sino que
 son consumidos por otro programa (el intérprete de Python) para llevarlos a
 instrucciones de la máquina virtual de Python y finalmente ejecutar tales
 instrucciones una a una en el CPU. La implementación más popular de intérprete
-está hecha en C y se conoce como CPython.
+está hecha en C y se conoce como cPython.
 
 En general, los programas escritos en C++ son varias veces más rápidos que
 programas con la misma funcionalidad escritos en Python, y los programas
@@ -2680,58 +2794,60 @@ que al movernos de C++ a Python, lo que se gana es mayor claridad en el código
 y tiempos de desarrollo más cortos, mientras que si nos movemos en la otra
 dirección, lo que se gana es mayor performance computacional.
 
-La posibilidad de escribir simulaciones de OMNeT++ usando Python en lugar de
+La posibilidad de escribir simulaciones de \omnetpp{} usando Python en lugar de
 C++ tiene varias ventajas asociadas:
 
-menor barrera de entrada para usuarios nuevos
+\begin{itemize}
+    \item menor barrera de entrada para usuarios nuevos
 
-mayor facilidad para incorporar OMNeT++ en cursos de computación
+    \item mayor facilidad para incorporar \omnetpp{} en cursos de computación
 
-menor tiempo de prototipado de nuevos modelos
+    \item menor tiempo de prototipado de nuevos modelos
 
-inmediata disponibilidad de todos los recursos del ecosistema Python
+    \item inmediata disponibilidad de todos los recursos del ecosistema Python
 
-posibilidad de introducir cambios en el modelo sin pasos extra de compilación
+    \item posibilidad de introducir cambios en el modelo sin pasos extra de
+compilación
+\end{itemize}
 
-La extensión de la herramienta OMNeT++ fue realizada sin necesidad de modificar
-el código fuente original, lo cual facilita su aplicación en distintas
-versiones de OMNeT++.
+La extensión de la herramienta \omnetpp{} fue realizada sin necesidad de modificar el código fuente original, lo cual facilita su aplicación en distintas versiones de \omnetpp{}.
 
 Las simulaciones ejecutadas con modelos hechos en Python arrojaron idénticos
 resultados que las versiones originales en C++, aunque con penalidades de
-performance de hasta 200x.
+performance variable (dependiendo de la complejidad del método \verb!handleMessage!).
 
 \subsection{Desafíos abiertos}
 
-Como se menciona en la sección Limitaciones y dificultades del capítulo
-destinado a hablar del desarrollo del trabajo, quedan algunos desafíos abiertos
-para continuar con la tarea iniciada en este trabajo, los cuales se detallan a
-continuación.
+Como se menciona en la sección~\ref{subsec:lim} del capítulo destinado a hablar
+del desarrollo del trabajo, quedan algunos desafíos abiertos para continuar con
+la tarea iniciada en este trabajo, los cuales se detallan a continuación.
 
 \subsubsection{Generación automática de librerías de extensión}
 
-Como se describió previamente, la extensión del intérprete con las librerías de
-OMNeT++ se realizó manualmente y exponiendo sólo aquellas partes que eran
-necesarias para portar las simulaciones de ejemplo del proyecto original.
+La extensión del intérprete con las librerías de \omnetpp{} se realizó
+manualmente y exponiendo sólo aquellas partes que eran necesarias para portar
+las simulaciones de ejemplo del proyecto original.
 
 Sería interesante que este proceso fuera automatizado de forma que dada una
-versión de OMNeT++ se generaran los Python bindings de la totalidad de la
+versión de \omnetpp{} se generaran los Python bindings de la totalidad de la
 librería.
 
 Las ventajas de esto serían:
 
-Que cualquier función, clase, método, macro, tipo definido en OMNeT++ (en C++)
-fuera accesible y extensible desde Python
+\begin{enumerate}
+    \item Que cualquier función, clase, método, macro, tipo definido en
+    \omnetpp{} (en C++) fuera accesible y extensible desde Python
 
-Se podría contar fácilmente con versiones de omnetpy para cualquier versión de
-OMNeT++ (recordar que el trabajo se basa en la versión 5.6.2 y se probó
-ligeramente sobre las versiones de perview de OMNeT++ 6).
+    \item Se podría contar fácilmente con versiones de omnetpy para cualquier
+    versión de \omnetpp{} (recordar que el trabajo se basa en la versión 5.6.2 y se
+    probó ligeramente sobre las versiones de perview de \omnetpp{} 6).
 
-En caso de emprender este esfuerzo, sería interesante dedicar algún tiempo a
-diseñar una infraestructura de testing. Por ej, realizar simulaciones en C++ y
-en Python y comparar que las salidas de sus ejecuciones sean idénticas,
-apuntando a que estas simulaciones utilicen el mayor porcentaje posible de las
-librerías.
+    \item En caso de emprender este esfuerzo, sería interesante dedicar algún
+    tiempo a diseñar una infraestructura de testing. Por ej, realizar simulaciones
+    en C++ y en Python y comparar que las salidas de sus ejecuciones sean
+    idénticas, apuntando a que estas simulaciones utilicen el mayor porcentaje
+    posible de las librerías.
+\end{enumerate}
 
 \subsubsection{Depurador interactivo en Python}
 
@@ -2743,7 +2859,7 @@ no es el programa principal, sino que está embebido en un programa en C++ (la
 simulación).
 
 Siendo la trazabilidad y la habilidad de depurar las simulaciones tan central
-en el proyecto OMNeT++, y siendo que este trabajo apunta a que escribir
+en el proyecto \omnetpp{}, y siendo que este trabajo apunta a que escribir
 simulaciones sea más simple, perder esta funcionalidad parece un contrasentido
 que merece la pena tratar de arreglar.
 
@@ -2751,7 +2867,7 @@ que merece la pena tratar de arreglar.
 
 Durante el desarrollo de este trabajo se recurrió a congelar un ambiente
 controlado dentro de una imagen Docker con versiones conocidas de todos los
-elementos de software involucrados (compilador, OMNeT++, Python, pybind11,
+elementos de software involucrados (compilador, \omnetpp{}, Python, pybind11,
 etc). Esto por un lado permitió contar con un ambiente controlado y repetible
 donde sabíamos que las cosas funcionaban y por otro tuvo la ventaja de hacer
 que el código pudiera ser aprovechado desde cualquier computadora con muy pocos
