@@ -3,6 +3,9 @@
 \usepackage{graphicx}
 \graphicspath{{./images/}}
 
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+
 \usepackage{xcolor}
 \definecolor{codelistingbg}{rgb}{0.95,0.95,0.95}
 \usepackage[
@@ -2394,7 +2397,7 @@ vida útil del contenedor).
 \subsubsection{Preparando un nuevo proyecto}
 
 Desde el IDE, seleccionar \ui{File $\rightarrow$ New $\rightarrow$ OMNeT++
-Project} (fig.~\ref{fig:new_project}). Al aparecer el diálogo Wizard, ingresar
+Project} (fig.~\ref{fig:new_project}). Al aparecer el diálogo, ingresar
 \verb!pytictoc! como nombre del proyecto, seleccionar \ui{Empty project} y
 luego \ui{Finish}. Un nuevo proyecto aparecerá en el área de proyectos del IDE.
 
@@ -2408,9 +2411,14 @@ luego \ui{Finish}. Un nuevo proyecto aparecerá en el área de proyectos del IDE
 \subsubsection{Agregando un archivo NED}
 
 Hacer click derecho en el proyecto y seleccionar \ui{New $\rightarrow$ Network
-Description File (NED)}.
+Description File (NED)} (fig.~\ref{fig:new_ned}).
 
-% TODO imagen
+\begin{figure}[h]
+\caption{Añadir archivo NED}
+\label{fig:new_ned}
+\centering
+\includegraphics[width=10cm]{add_ned}
+\end{figure}
 
 Guardarlo como \verb!pytictoc.ned! con el siguiente contenido:
 
@@ -2466,14 +2474,25 @@ En el panel del editor seleccionar el archivo \verb!txc.cc! (la fuente en C++).
 Esto es importante para forzar al IDE a ofrecernos la compilación de una
 simulación C++ en el siguiente paso.
 
-Seleccionar \ui{Run $\rightarrow$ Run} y elegir \ui{OMNeT++ Simulation}
+Seleccionar \ui{Run $\rightarrow$ Run} y elegir \ui{OMNeT++ Simulation} (fig.~\ref{fig:run}).
 
-% TODO imagen
+\begin{figure}[h]
+\caption{Correr la simulación}
+\label{fig:run}
+\centering
+\includegraphics[width=10cm]{run_simulation}
+\end{figure}
 
 Luego de la compilación, se lanza automáticamente la ejecución de la
-simulación:
+simulación (fig.~\ref{fig:first_run}).
 
-% TODO imagen
+
+\begin{figure}[h]
+\caption{Simulación}
+\label{fig:first_run}
+\centering
+\includegraphics[width=10cm]{first_run}
+\end{figure}
 
 \section{Evaluación}\label{sec:ev}
 
@@ -2482,11 +2501,52 @@ Python. Para realizar esta tarea se implementó la simulación de ejemplo aloha
 (parte de la distribución oficial de \omnetpp{}) en Python (la llamaremos
 pyaloha).
 
-Se puede mostrar teóricamente que para el protocolo de transmisión aloha el uso óptimo del
-canal ($\frac{1}{e}$, aproximadamente $18.4\%$) ocurre cuando se emite un paquete cada dos
-unidades de tiempo, mientras que para el protocolo aloha ranurado, el uso
-óptimo ($\frac{1}{2e}$, aproximadamente $36,8\%$) ocurre cuando se emite un paquete por
-unidad de tiempo [42].
+Se puede mostrar teóricamente que para el protocolo de transmisión aloha el uso
+óptimo del canal ($\frac{1}{e}$, aproximadamente $18.4\%$) ocurre cuando se
+emite un paquete cada dos unidades de tiempo, mientras que para el protocolo
+aloha ranurado, el uso óptimo ($\frac{1}{2e}$, aproximadamente $36,8\%$) ocurre
+cuando se emite un paquete por unidad de tiempo [42]. Como se puede observar en
+la figura~\ref{fig:channel_rate_aloha}, los datos simulados coinciden con los
+cálculos teóricos.
+
+\begin{figure}[h]
+\centering
+\caption{Simulación aloha (C++)}
+\label{fig:channel_rate_aloha}
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel={Tiempo medio entre paquetes (s)},
+    ylabel={Tasa de uso del canal},
+    xmin=0, xmax=15,
+    ymin=0, ymax=0.5,
+    legend pos=north east,
+    ymajorgrids=true,
+    grid style=dashed,
+]
+
+\addplot[
+    color=blue,
+    mark=*,
+    mark size=1pt
+    ]
+    coordinates {
+        (0.1, 0.006466311480521) (0.2, 0.037610105670009) (0.3, 0.098827804181821) (0.4, 0.16064480261995) (0.5, 0.21978882360328) (0.6, 0.26590445965143) (0.7, 0.30069543988558) (0.8, 0.32841614300196) (0.9, 0.35030633100803) (1, 0.3620135096168) (1.5, 0.37417182276006) (2, 0.35808126966332) (2.5, 0.32315465311504) (3, 0.29777006758858) (4, 0.25638056059959) (5, 0.21972448797673) (6, 0.19226166810694) (7, 0.16888638161703) (8, 0.15047976608798) (9, 0.13547151185145) (10, 0.124433562124) (11, 0.11527294248685) (12, 0.10688476729002) (13, 0.098825058505501) (14, 0.093616973912472) (15, 0.088037337300734)
+    };
+
+\addplot[
+    color=green,
+    mark=*,
+    mark size=1pt
+    ]
+    coordinates {
+        (0.1, 0) (0.2, 0) (0.3, 0.00076325300354625) (0.4, 0.0039588643604514) (0.5, 0.011682838306187) (0.6, 0.025603452468452) (0.7, 0.039420787497505) (0.8, 0.056545297349915) (0.9, 0.072230508946743) (1, 0.087666903783682) (1.5, 0.14858681850652) (2, 0.17922565762884) (2.5, 0.18868286038616) (3, 0.19206834134435) (4, 0.18305322477005) (5, 0.16710512686259) (6, 0.15294315842394) (7, 0.13886721388324) (8, 0.12723940926008) (9, 0.11648069652152) (10, 0.1087283587839) (11, 0.10134104010002) (12, 0.094900113189545) (13, 0.090550009969597) (14, 0.085604136965468) (15, 0.080802896018396)
+    };
+
+\legend{Aloha ranurado, Aloha puro}
+    
+\end{axis}
+\end{tikzpicture}
+\end{figure}
 
 \subsection{Verificación}
 
@@ -2509,16 +2569,23 @@ Se ejecutó la simulación con los siguientes parámetros:
 donde $\lambda$ se hizo variar entre 0 y 15 (segundos)
 \end{itemize}
 
-Para el modelo original implementado en C++, se obtuvieron los siguientes
-resultados:
+Para cada valor de $\lambda$ se corrió la simulación 4 veces:
 
-% TODO imagen
+\begin{itemize}
+    \item En C++, aloha puro
+    \item En C++, aloha ranurado
+    \item En Python, aloha puro
+    \item En Python, aloha ranurado
+\end{itemize}
 
-Para el modelo pyaloha se obtuvieron los mismos resultados. No es que se
-obtuvieron resultados similares: se obtuvieron exactamente los mismos
-resultados. Recordar que la inicialización del generador de números aleatorios
-utiliza la misma semilla, por lo que los eventos han sido generados en tiempos
-exactamente iguales, en ambos modelos.
+\noindent y en cada experimento se recogió la tasa de utilización del canal
+calculada por el programa.
+
+El hallazgo fue que para el modelo pyaloha se obtuvieron los mismos resultados
+que para el modelo aloha. No es que se obtuvieron resultados similares: se
+obtuvieron exactamente los mismos resultados. Recordar que la inicialización
+del generador de números aleatorios utiliza la misma semilla, por lo que los
+eventos han sido generados en tiempos exactamente iguales, en ambos modelos.
 
 Esto deja claro que la implementación del modelo en Python es tan funcional
 como la implementación del modelo en C++.
@@ -2539,14 +2606,92 @@ más tiempo para finalizar. Esto es debido a que se generan más mensajes
 (eventos) que deben ser procesados por el kernel de simulación hasta alcanzar
 el tiempo límite de 60 minutos (simulados).
 
-Observamos que la ejecución más lenta del modelo hecho en C++ corre en menos de
-un segundo:
+En la figura~\ref{fig:aloha_cpp_time} vemos que la ejecución más lenta del
+modelo hecho en C++ corre en menos de un segundo:
 
-% todo imagen
+\begin{figure}[h]
+\centering
+\caption{Tiempo de ejecución aloha (C++)}
+\label{fig:aloha_cpp_time}
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel={Tiempo medio entre paquetes (s)},
+    ylabel={Duración de la simulación (s)},
+    xmin=0, xmax=15,
+    ymin=0, ymax=1,
+    legend pos=north east,
+    ymajorgrids=true,
+    grid style=dashed,
+]
 
-En tanto que para pyaloha, el tiempo alcanzado supera los 3 minutos:
+\addplot[
+    color=blue,
+    mark=*,
+    mark size=1pt
+    ]
+    coordinates {
+        (0.1, 0.5848276320002697) (0.2, 0.4584900680001738) (0.3, 0.3809897589999309) (0.4, 0.32006621599975915) (0.5, 0.2715306320005766) (0.6, 0.26100987900008477) (0.7, 0.21912263300055201) (0.8, 0.19208460500067304) (0.9, 0.1798737869994511) (1, 0.15734090299974923) (1.5, 0.12501570099993842) (2, 0.09409088400025212) (2.5, 0.08267888499995024) (3, 0.07369433799976832) (4, 0.05768032499963738) (5, 0.05032164899967029) (6, 0.045464001999789616) (7, 0.039412827999512956) (8, 0.03712264900059381) (9, 0.03749758800040581) (10, 0.03290581700002804) (11, 0.03088372000001982) (12, 0.031212740000228223) (13, 0.03161678299966297) (14, 0.027711645000636054) (15, 0.026821356999789714)
+    };
 
-% todo imagen
+\addplot[
+    color=green,
+    mark=*,
+    mark size=1pt
+    ]
+    coordinates {
+        (0.1, 0.7302508539996779) (0.2, 0.5210480169998846) (0.3, 0.3756052059998183) (0.4, 0.3123093889989832) (0.5, 0.2664828619999753) (0.6, 0.23273999100092624) (0.7, 0.21011473699945782) (0.8, 0.17592885900012334) (0.9, 0.17366348799987463) (1, 0.15758263200041256) (1.5, 0.12107748500056914) (2, 0.09663343200008967) (2.5, 0.08128265099912824) (3, 0.07034532000034233) (4, 0.05974540800161776) (5, 0.05028533099903143) (6, 0.04651024399936432) (7, 0.0404815130004863) (8, 0.03751071900114766) (9, 0.034700645999691915) (10, 0.032678042000043206) (11, 0.03193541699874913) (12, 0.029999125999893295) (13, 0.028916971999933594) (14, 0.02776208700015559) (15, 0.02700130499943043)
+    };
+
+\legend{Aloha ranurado, Aloha puro}
+    
+\end{axis}
+\end{tikzpicture}
+\end{figure}
+
+
+En tanto que para pyaloha, el tiempo alcanzado ronda los 2 minutos, como se
+aprecia en la figura~\ref{fig:aloha_py_time}.
+
+
+\begin{figure}[h]
+\centering
+\caption{Tiempo de ejecución pyaloha (Python)}
+\label{fig:aloha_py_time}
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel={Tiempo medio entre paquetes (s)},
+    ylabel={Duración de la simulación (s)},
+    xmin=0, xmax=15,
+    ymin=0, ymax=200,
+    legend pos=north east,
+    ymajorgrids=true,
+    grid style=dashed,
+]
+
+\addplot[
+    color=blue,
+    mark=*,
+    mark size=1pt
+    ]
+    coordinates {
+        (0.1, 119.21491560300001) (0.2, 88.72029479499997) (0.3, 72.0835129140005) (0.4, 58.36702549600068) (0.5, 50.37430065300032) (0.6, 42.77850106799997) (0.7, 37.25045305599997) (0.8, 33.3296159420006) (0.9, 32.00576179299969) (1, 29.37238604600043) (1.5, 21.154129888999705) (2, 15.896753297000032) (2.5, 13.319568406999679) (3, 11.031811740999728) (4, 8.387699105999673) (5, 6.728005928999664) (6, 5.965362578000168) (7, 4.820465584999511) (8, 4.209939122000833) (9, 3.5890565689996947) (10, 3.4924967070001003) (11, 3.1877669390005394) (12, 2.8483696450002753) (13, 2.701907260000553) (14, 2.4378241889999117) (15, 2.4747979300000225)
+    };
+
+\addplot[
+    color=green,
+    mark=*,
+    mark size=1pt
+    ]
+    coordinates {
+        (0.1, 145.31575596400035) (0.2, 101.02737987899945) (0.3, 72.07944632700037) (0.4, 59.69938408300004) (0.5, 48.79803602100037) (0.6, 44.44012174099953) (0.7, 39.112202779000654) (0.8, 35.348774288999266) (0.9, 30.71674825699847) (1, 26.81410339300055) (1.5, 19.10262854999928) (2, 15.320787870999993) (2.5, 12.419898019001266) (3, 11.003627136999057) (4, 7.984181870999237) (5, 6.520586059999914) (6, 5.483925722999629) (7, 4.905973154000094) (8, 4.3254758639996) (9, 3.870026284999767) (10, 3.3397165300011693) (11, 3.0784308909987885) (12, 2.9317122180000297) (13, 2.700906940001005) (14, 2.5422813530003623) (15, 2.188418952000575)
+    };
+
+\legend{Aloha ranurado, Aloha puro}
+    
+\end{axis}
+\end{tikzpicture}
+\end{figure}
+
 
 Independientemente del tiempo medio entre mensajes, del tiempo total de la
 simulación o de si el protocolo es ranurado o no, se puede observar que el
@@ -2559,18 +2704,18 @@ lento, procesando sólo $6000$ eventos por segundo.
 Para Tictoc1, que consiste en un simple pasaje de mensajes entre dos instancias
 de \verb!Txc!, encontramos que el modelo implementado en C++ procesa unos 5
 millones de eventos por segundo, mientras que el que utiliza Python sólo
-alcanza el medio millón, es decir, es unas 10 veces más lento.
+alcanza el medio millón, es decir, es unas $10$ veces más lento.
 
-Tictoc2 presenta herramientas para loggear información durante una simulación.
-En particular, se introduce el constructo \verb!EV!, que en C++ está
-implementado como un macro. En este caso, la performance de C++ no se ve
-afectada, alcanzando también unos 5 millones de eventos por segundo. En cambio,
-el modelo que utiliza Python sólo alcanza unos 17.000 mensajes por segundos
-(unas 300 veces más lento). Esto se debe a que en Python, \verb!EV! no está
-llamando directamente a código C++ de \omnetpp{} (que, como se dijo en la
-sección~\ref{subsec:ev}, es un macro y por lo tanto es expandido en tiempo de
-compilación) si no que es un objeto que inspecciona el stack para conocer el
-contexto.
+Tictoc2 introduce el uso herramientas para loggear información durante una
+simulación. En particular, se presenta el constructo \verb!EV!.  En este caso,
+la performance de C++ no se ve afectada, alcanzando también unos 5 millones de
+eventos por segundo. En cambio, el modelo que utiliza Python sólo alcanza unos
+$17.000$ mensajes por segundos (unas $300$ veces más lento). Esto se debe a que
+en Python, \verb!EV! no está llamando directamente a código C++ de \omnetpp{}.
+Como se dijo en la sección~\ref{subsec:ev}, en C++ es un macro y por lo tanto
+es expandido en tiempo de compilación, mientra sque en Python es un objeto que
+inspecciona el stack para conocer el contexto y recién entonces llama a una API
+de C++.
 
 En efecto, si el modelo en C++ dice:
 
@@ -2619,7 +2764,7 @@ En ciertos fragmentos de código donde predomina la llamada a métodos y
 funciones de \omnetpp{}, los modelos en C++ y los modelos en Python son
 necesariamente casi idénticos, como se observa en el siguiente ejemplo:
 
-routing/builder/netbuilder.cc
+\noindent C++:
 
 \begin{minted}[linenos=false]{c++}
 void NetBuilder::initialize()
@@ -2628,7 +2773,7 @@ void NetBuilder::initialize()
 }
 \end{minted}
 
-pyrouting/pymodules/netbuilder.py:
+\noindent Python:
 
 \begin{minted}[linenos=false]{Python}
     def initialize(self):
@@ -2645,9 +2790,7 @@ para mostrar cómo trabajar con \omnetpp{}, lo cual hace que el código consista
 principalmente en llamadas a las APIs y, por lo tanto, su implementación usando
 Python sea prácticamente igual en términos de cantidad de líneas.
 
-Donde realmente vemos la diferencia es, por ejemplo:
-
-routing/builder/netbuilder.cc
+Donde realmente vemos la diferencia es, por ejemplo, en el siguiente fragmento:
 
 \begin{minted}[linenos=false]{c++}
 
