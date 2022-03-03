@@ -1,0 +1,38 @@
+\chapter{Introducción}
+\section{Objetivo}
+
+El objetivo de esta tesis es proveer de una interfaz simple y compacta para
+especificar el comportamiento de modelos de simulación para la plataforma
+\omnetpp{} mediante el uso del lenguaje Python.
+
+\section{Hipótesis}
+
+Es posible definir módulos simples de \omnetpp{} en scripts escritos en Python e
+integrarlos de manera que el usuario experience mínima o nula complejidad en el
+proceso.
+
+\section{Metodología}
+
+La metodología en la que se basa esta tesis es extender y embeber el intérprete
+de Python para que pueda recibir y transmitir comportamiento desde y hacia C++.
+
+\section{Impacto}
+
+El resultado del trabajo (disponible en https://github.com/mmodenesi/omnetpy/)
+resulta beneficioso para personas que buscan aprovechar la plataforma \omnetpp{}
+para realizar simulaciones, pero para quienes la programación directa en C++
+resulta un obstáculo. En particular, facilita la utilización de \omnetpp{} como
+herramienta pedagógica en cursos de ciencias de computación donde los
+estudiantes suelen contar con un dominio bastante bueno de Python, pero en
+general desconocen C++.  El interés de este proyecto ha sido reconocido por los
+desarrolladores de \omnetpp{} (https://omnetpp.org/download-items/omnetpy.html).
+
+\section{Estructura}
+
+El capítulo~\ref{sec:eda} de esta tesis presenta el estado del arte alrededor
+de \omnetpp{} y la simulación de eventos discretos. Se realiza una comparación
+entre C++ y Python. El capítulo~\ref{sec:met} presenta la metodología. El
+capítulo~\ref{sec:des} discute el detalle del desarrollo. La herramienta
+omnetpy se presenta en el capítulo~\ref{sec:omnetpy}. El capítulo~\ref{sec:ev}
+evalúa cualitativa y cuantitativamente omnetpy. Las conclusiones se resumen en
+el capítulo~\ref{sec:conc}, así como los desafíos abiertos.

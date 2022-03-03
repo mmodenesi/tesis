@@ -1,0 +1,124 @@
+\chapter{Conclusiones}\label{sec:conc}
+Se presenta una extensión del simulador de eventos discreto \omnetpp{} que permite
+escribir módulos simples en el lenguaje de programación Python. Esto habilita a
+la escritura de modelos de simulación sin necesidad de saber programar en el
+lenguaje oficial de \omnetpp{}, es decir, C++.
+
+C++ es un lenguaje de programación que provee pocas abstracciones sobre el
+hardware subyacente y que se compila para obtener un binario ejecutable
+convierten en herramienta muy poderosa para escribir código de alta performance
+(administración manual de la memoria, complejo sistema de tipos, posibilidad de
+incluir código assembly), hacen de este un lenguaje de difícil dominio y con
+tiempos de desarrollo relativamente largos, si los comparamos con otros
+lenguajes como Python.
+
+Python es un lenguaje de programación de mucho más alto nivel, donde los
+detalles del hardware son alejados del usuario final. Un sistema de tipos más
+flexible que requiere menos especificidad por parte del usuario, manejo
+automático de la memoria, una sintaxis más cercana al lenguaje natural, hacen
+de este un lenguaje muy idóneo para principiantes o para enseñanza en carreras
+relacionadas a la computación. Los programas en Python no se compilan, sino que
+son consumidos por otro programa (el intérprete de Python) para llevarlos a
+instrucciones de la máquina virtual de Python y finalmente ejecutar tales
+instrucciones una a una en el CPU. La implementación más popular de intérprete
+está hecha en C y se conoce como cPython.
+
+En general, los programas escritos en C++ son varias veces más rápidos que
+programas con la misma funcionalidad escritos en Python, y los programas
+escritos en Python son más fáciles de entender, modificar, extender. Es decir
+que al movernos de C++ a Python, lo que se gana es mayor claridad en el código
+y tiempos de desarrollo más cortos, mientras que si nos movemos en la otra
+dirección, lo que se gana es mayor performance computacional.
+
+La posibilidad de escribir simulaciones de \omnetpp{} usando Python en lugar de
+C++ tiene varias ventajas asociadas:
+
+\begin{itemize}
+    \item menor barrera de entrada para usuarios nuevos
+
+    \item mayor facilidad para incorporar \omnetpp{} en cursos de computación
+
+    \item menor tiempo de prototipado de nuevos modelos
+
+    \item inmediata disponibilidad de todos los recursos del ecosistema Python
+
+    \item posibilidad de introducir cambios en el modelo sin pasos extra de
+compilación
+\end{itemize}
+
+La extensión de la herramienta \omnetpp{} fue realizada sin necesidad de
+modificar el código fuente original, lo cual facilita su aplicación en
+distintas versiones de \omnetpp{}.
+
+Las simulaciones ejecutadas con modelos hechos en Python arrojaron idénticos
+resultados que las versiones originales en C++, aunque con penalidades de
+performance variable (dependiendo de la complejidad del método \verb!handleMessage!).
+
+\section{Desafíos abiertos}
+
+Como se menciona en la sección~\ref{subsec:lim}, quedan algunos desafíos
+abiertos para continuar con la tarea iniciada en este trabajo, los cuales se
+detallan a continuación.
+
+\subsection{Generación automática de librerías de extensión}
+
+La extensión del intérprete con las librerías de \omnetpp{} se realizó
+manualmente y exponiendo sólo aquellas partes que eran necesarias para portar
+las simulaciones de ejemplo del proyecto original.
+
+Sería interesante que este proceso fuera automatizado de forma que dada una
+versión de \omnetpp{} se generaran los Python bindings de la totalidad de la
+librería.
+
+Las ventajas de esto serían:
+
+\begin{enumerate}
+    \item Que cualquier función, clase, método, macro, tipo definido en
+    \omnetpp{} (en C++) fuera accesible y extensible desde Python
+
+    \item Se podría contar fácilmente con versiones de omnetpy para cualquier
+    versión de \omnetpp{} (recordar que el trabajo se basa en la versión 5.6.2 y se
+    probó ligeramente sobre las versiones de perview de \omnetpp{} 6).
+
+    \item En caso de emprender este esfuerzo, sería interesante dedicar algún
+    tiempo a diseñar una infraestructura de testing. Por ej, realizar simulaciones
+    en C++ y en Python y comparar que las salidas de sus ejecuciones sean
+    idénticas, apuntando a que estas simulaciones utilicen el mayor porcentaje
+    posible de las librerías.
+\end{enumerate}
+
+\subsection{Depurador interactivo en Python}
+
+Actualmente, cuando un modelo hecho en Python no se comporta de la forma que se
+espera y se dificulta encontrar el error, no es posible recurrir a establecer
+un punto de depuración (debugging) y realizar una inspección interactiva y
+pausada del estado de las variables. Esto es así porque el intérprete de Python
+no es el programa principal, sino que está embebido en un programa en C++ (la
+simulación).
+
+Siendo la trazabilidad y la habilidad de depurar las simulaciones tan central
+en el proyecto \omnetpp{}, y siendo que este trabajo apunta a que escribir
+simulaciones sea más simple, perder esta funcionalidad parece un contrasentido
+que merece la pena tratar de arreglar.
+
+\subsection{Formas de distribución y disponibilización}
+
+Durante el desarrollo de este trabajo se recurrió a congelar un ambiente
+controlado dentro de una imagen Docker con versiones conocidas de todos los
+elementos de software involucrados (compilador, \omnetpp{}, Python, pybind11,
+etc). Esto por un lado permitió contar con un ambiente controlado y repetible
+donde sabíamos que las cosas funcionaban y por otro tuvo la ventaja de hacer
+que el código pudiera ser aprovechado desde cualquier computadora con muy pocos
+pasos de preparación.
+
+No obstante, a la larga esto va a convertirse en una limitación: los sistemas
+operativos dejan de ser mantenidos, las librerías necesarias ya no se consiguen
+o dejan de tener mantenimiento oficial, Python 3.6 en algún momento será
+declarado oficialmente sin soporte y ya nadie escribirá librerías para
+enriquecer su ecosistema. Sería interesante pensar en algún mecanismo más
+general de compilación y distribución que pudiera fácilmente seguir el ritmo de
+los nuevos lanzamientos (nuevas versiones de Python, de pybind11, etc).
+
+En cuanto a la tecnología de virtualización elegida (Docker) probó ser muy
+beneficiosa desde el punto de vista de la facilidad de instalación, pero sería
+interesante documentar otras formas de usar omnetpy sin recurrir a ella.

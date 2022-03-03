@@ -1,0 +1,22 @@
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\graphicspath{{./images/}}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+
+\usepackage{xcolor}
+\definecolor{codelistingbg}{rgb}{0.95,0.95,0.95}
+\usepackage[
+  cache=false,
+  outputdir=/build,
+]{minted}
+
+\setminted{
+    linenos=true,
+    bgcolor=codelistingbg,
+    fontsize=\scriptsize,
+    breaklines=true
+}
+
+\usepackage[utf8]{inputenc}
