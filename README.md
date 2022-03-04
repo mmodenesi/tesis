@@ -3,7 +3,7 @@
 Hacé lo siguiente:
 
 ```
-make build_images
+make build_image
 make build
 make bib
 make build
