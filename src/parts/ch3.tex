@@ -6,15 +6,15 @@ Existen diversas formas documentadas en las que Python y C (o C++) pueden
 interactuar y utilizarse conjuntamente. A continuación se exploran dichos
 mecanismos.
 
-Siguiendo la documentación oficial [31], es común clasificar las integraciones
-entre C/C++ y Python en dos grupos:
+Siguiendo la documentación oficial \cite{extending}, es común clasificar las
+integraciones entre C/C++ y Python en dos grupos:
 
 \begin{itemize}
     \item \textbf{Extender el intérprete}: invocar código escrito en C/C++
-desde un programa escrito en Python (fig~\ref{fig:extender}).
+    desde un programa escrito en Python (fig~\ref{fig:extender}).
 
     \item \textbf{Embeber el intérprete}: Invocar código originalmente escrito
-en Python desde un programa escrito en C/C++ (fig~\ref{fig:embeber}).
+    en Python desde un programa escrito en C/C++ (fig~\ref{fig:embeber}).
 \end{itemize}
 
 \begin{figure}[h]
@@ -37,7 +37,8 @@ llamadas a módulos escritos en C/C++. Esto brinda principalmente dos
 beneficios: por un lado, delegar parte de la computación en código de mejor
 performance (procesamiento numérico, imágenes) y, por otro, la posibilidad de
 realizar llamadas a las APIs del sistema en forma directa. Esta es una de las
-formas en que muchos módulos propios de Python están escritos (ver [32]).
+formas en que muchos módulos propios de Python están escritos. \footnote{Ver por ejemplo
+\url{https://github.com/python/cpython/tree/master/Modules})}
 
 Cuando embebemos al intérprete, en cambio, el programa principal es otra
 aplicación que usa al intérprete de Python como una librería más. Esta librería
@@ -53,7 +54,7 @@ la tarea de hacer que Python y C/C++ trabajen en conjunto (en cualquiera de las
 dos direcciones) se brindan a continuación ejemplos de ambos tipos de
 integración.
 
-\paragraph{Extendiendo Python con C / C++}
+\paragraph{Extendiendo Python con C/C++}
 
 Supongamos que queremos escribir en C una función que compute el cuadrado de un
 número, y queremos que dicha función sea accesible al intérprete de Python.
@@ -69,13 +70,13 @@ Cuando el código Python invoca la función square tienen que ocurrir tres cosas
 
 \begin{enumerate}
     \item El parámetro 2, que es un objeto Python debe ser convertido al tipo
-\verb!int!.
+    \verb!int!.
 
     \item El parámetro debe ser pasado a la función y el CPU debe ejecutar el
-código binario generado a partir del código fuente C.
+    código binario generado a partir del código fuente C.
 
     \item El valor de retorno (un \verb!int! con el valor 4) debe ser
-convertido a un objeto Python.
+    convertido a un objeto Python.
 \end{enumerate}
 
 Para comprender por qué esto es así, debemos recordar en primer lugar que
@@ -187,23 +188,23 @@ necesarios:
 
 \begin{description}
     \item[Debemos extender el intérprete de Python] para que usuarios puedan
-heredar de \verb!cSimpleModule! al especificar el funcionamiento de sus
-módulos. El sistema sólo acepta módulos que son subclases de aquella. Si esta
-tarea de especificación ha de realizarse en Python, como nos proponemos,
-entonces es menester habilitar la escritura de algo como from omnetpp import
-\verb!cSimpleModule! para comenzar a definir los módulos a partir de dicha
-clase base. Se sigue que al menos parte del código de \omnetpp{} debe ser
-expuesto al mundo de Python.
+    heredar de \verb!cSimpleModule! al especificar el funcionamiento de sus
+    módulos. El sistema sólo acepta módulos que son subclases de aquella. Si
+    esta tarea de especificación ha de realizarse en Python, como nos
+    proponemos, entonces es menester habilitar la escritura de algo como from
+    omnetpp import \verb!cSimpleModule! para comenzar a definir los módulos a
+    partir de dicha clase base. Se sigue que al menos parte del código de
+    \omnetpp{} debe ser expuesto al mundo de Python.
 
     \item[Debemos embeber el intérprete de Python en \omnetpp{}] para que la
-aplicación principal siga siendo el binario de simulación que se obtiene al
-compilar un proyecto tradicional de \omnetpp{}. Si esto no fuera así,
-deberíamos reescribir, entre otras cosas, el código de la interfaz de usuario
-de las simulaciones.  Para conservar toda esa funcionalidad, queremos que el
-binario que genera \omnetpp{} cambie lo menos posible, pero que entre esos
-cambios se encuentre la capacidad de cargar módulos y ejecutar clases escritas
-en Python. Esto impone la necesidad de inicializar y finalizar un intérprete de
-Python (a su debido tiempo).
+    aplicación principal siga siendo el binario de simulación que se obtiene al
+    compilar un proyecto tradicional de \omnetpp{}. Si esto no fuera así,
+    deberíamos reescribir, entre otras cosas, el código de la interfaz de
+    usuario de las simulaciones.  Para conservar toda esa funcionalidad,
+    queremos que el binario que genera \omnetpp{} cambie lo menos posible, pero
+    que entre esos cambios se encuentre la capacidad de cargar módulos y
+    ejecutar clases escritas en Python. Esto impone la necesidad de inicializar
+    y finalizar un intérprete de Python (a su debido tiempo).
 \end{description}
 
 \begin{figure}[h]
@@ -217,10 +218,11 @@ Esto plantea dos desafíos, que son el núcleo del trabajo realizado:
 
 \begin{enumerate}
     \item ¿Cómo exponer al intérprete de Python toda la funcionalidad
-preexistente en las librerías de simulación, para que el usuario pueda escribir
-módulos simples en Python?
+    preexistente en las librerías de simulación, para que el usuario pueda
+    escribir módulos simples en Python?
+
     \item ¿Cómo intervenir el proyecto \omnetpp{} de forma que instancie y
-ejecute un intérprete de Python embebido en él?
+    ejecute un intérprete de Python embebido en él?
 \end{enumerate}
 
 \subsection{Herramientas de más alto nivel para lograr la integración}
@@ -244,7 +246,9 @@ retorno).
 Un ejemplo de esta problemática puede encontrarse en la generación de los
 bindings para Python de OpenCV (librería hecha en C++, especializada en
 algoritmos de procesamiento de imágenes). En How OpenCV-Python bindings are
-generated? [33] leemos:
+generated?
+\footnote{\url{https://docs.opencv.org/master/da/d49/tutorial_py_bindings_basics.html}}
+leemos:
 
 \begin{quotation}
 In OpenCV, all algorithms are implemented in C++. But these algorithms can be
@@ -265,32 +269,38 @@ Existen en el ecosistema de la creación de bindings y wrappers varios proyectos
 que buscan resolver este problema de forma más genérica. Algunos de ellos son:
 
 \begin{itemize}
-    \item swig [34]: herramienta para la generación de código mediante el cual
-se puede conectar una aplicación hecha en C o C++ con una variedad de lenguajes
-de programación. Típicamente se utiliza para parsear el código en C o C++ y
-proveer el código necesario para exponerlo en el lenguaje de destino.
+    \item swig [34] (\url{http://swig.org}): herramienta para la generación de
+    código mediante el cual se puede conectar una aplicación hecha en C o C++
+    con una variedad de lenguajes de programación. Típicamente se utiliza para
+    parsear el código en C o C++ y proveer el código necesario para exponerlo
+    en el lenguaje de destino.
 
-    \item boost.Python [35]: librería hecha en C++ con el objetivo de proveer
-integración entre C++ y Python. Facilita la tarea de exponer proyectos hechos
-en C++ como módulos de Python disminuyendo la cantidad de código que el usuario
-debe escribir para generar los bindings. Hay que mencionar que es una pequeña
-parte de un proyecto mucho más abarcativo formado por numerosas librerías para
-C++.
+    \item boost.Python
+    (\url{https://www.boost.org/doc/libs/1_77_0/libs/python/doc/html/index.html}):
+    librería hecha en C++ con el objetivo de proveer integración entre C++ y
+    Python. Facilita la tarea de exponer proyectos hechos en C++ como módulos
+    de Python disminuyendo la cantidad de código que el usuario debe escribir
+    para generar los bindings. Hay que mencionar que es una pequeña parte de un
+    proyecto mucho más abarcativo formado por numerosas librerías para C++.
 
-    \item pybind11 [36]: Comparte el objetivo (y mucha de la sintaxis) con
-boost.Python.  Intenta diferenciarse de aquella en que es una librería formada
-enteramente por encabezados (archivos .h). Su código es más escueto y en
-ocasiones permite simplificar la sintaxis en relación a boost.Python. 
+    \item pybind11 (\url{https://pybind11.readthedocs.io/en/stable/}): Comparte
+    el objetivo (y mucha de la sintaxis) con boost.Python.  Intenta
+    diferenciarse de aquella en que es una librería formada enteramente por
+    encabezados (archivos .h). Su código es más escueto y en ocasiones permite
+    simplificar la sintaxis en relación a boost.Python. 
 
-    \item binder [37]: Intenta solucionar la generación automática del código
-necesario para exponer C++ a Python utilizando la librería pybind11.
+    \item binder (\url{https://cppbinder.readthedocs.io/en/latest/about.html}):
+    Intenta solucionar la generación automática del código necesario para
+    exponer C++ a Python utilizando la librería pybind11.
 
-    \item cpppy [38][39]: Haciendo uso de las librerías del proyecto LLVM
-permite ejecutar código C++ desde Python sin la necesidad de generación previa
-de bindings ni del uso de un lenguaje intermedio. El código en C++ se provee
-directamente como strings a funciones que producen LLVM IR (LLVM Intermediate
-Representation, una especie de assembly que usa LLVM antes de pasar a código
-máquina de una arquitectura específica) y se compila en tiempo de ejecución.
+    \item cpppy (\url{https://cppyy.readthedocs.io/en/latest/}): Haciendo uso
+    de las librerías del proyecto LLVM permite ejecutar código C++ desde Python
+    sin la necesidad de generación previa de bindings ni del uso de un lenguaje
+    intermedio. El código en C++ se provee directamente como strings a
+    funciones que producen LLVM IR (LLVM Intermediate Representation, una
+    especie de assembly que usa LLVM antes de pasar a código máquina de una
+    arquitectura específica) y se compila en tiempo de ejecución
+    \cite{lavrijsen}.
 \end{itemize}
 
 Para dar idea al lector del tipo de beneficio que se obtiene al emplear estas
@@ -325,8 +335,9 @@ escueto y sencillo.
 
 Se eligió la herramienta pybind11 para lograr la interacción entre Python y C++
 por resultar la más sencilla de utilizar y por ser su documentación muy
-completa. Por otro lado, como se puede apreciar en el repositorio oficial [41],
-resulta ser un proyecto activamente mantenido y con mucho uso en la comunidad.
+completa. Por otro lado, como se puede apreciar en el repositorio oficial
+\footnote{\url{https://github.com/pybind/pybind11}}, resulta ser un proyecto
+activamente mantenido y con mucho uso en la comunidad.
 
 Si bien resulta muy atractivo el proyecto binder y su promesa de generar
 código para exponer el proyecto usando pybind11 de forma automática, el
@@ -385,9 +396,10 @@ código contra distintas versiones de \omnetpp{} y se comenzó a utilizar Ubuntu
 19.10 con Python 3.7.5, sin dificultades observables.
 
 \subsection{Caso de estudio}
-La documentación oficial de \omnetpp{} provee un tutorial en siete partes que va
-complejizando gradualmente una simulación llamada ``tictoc'' [40]. De esta forma
-se busca que los nuevos usuarios puedan familiarizarse con las funcionalidades
+La documentación oficial de \omnetpp{} provee un tutorial en siete partes que
+va complejizando gradualmente una simulación llamada ``tictoc''
+\footnote{\url{https://docs.omnetpp.org/tutorials/tictoc/}}. De esta forma se
+busca que los nuevos usuarios puedan familiarizarse con las funcionalidades
 principales que ofrece la herramienta.
 
 La simulación ``tictoc'' (si bien conoce variaciones a lo largo del tutorial)

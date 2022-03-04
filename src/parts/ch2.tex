@@ -33,8 +33,10 @@ sistema no trivial suele ser muy complejo para ser tratado mediante estos
 métodos. Aparece entonces la simulación como una forma de ganar comprensión
 sobre el funcionamiento del sistema.
 
+% TODO: confirmar la fuente de este diagrama
+
 \begin{figure}[h]
-\caption{Formas de estudiar un sistema}
+\caption{Formas de estudiar un sistema \cite{law}}
 \centering
 \includegraphics[width=8cm]{taxonomia}
 \end{figure}
@@ -52,38 +54,38 @@ sistema a través de una línea temporal artificial.
 La construcción de una simulación ofrece las siguientes ventajas:
 \begin{itemize}
     \item Nuevas políticas, procedimientos de operación, reglas de decisión,
-flujos de información, procedimientos de organización, etc. pueden ser
-explorados sin perturbar la operación del sistema real.
+    flujos de información, procedimientos de organización, etc. pueden ser
+    explorados sin perturbar la operación del sistema real.
 
     \item Nuevos diseños pueden ser probados sin asignar recursos a la
-adquisición de elementos físicos, antes de implementar cambios en el mundo
-real.
+    adquisición de elementos físicos, antes de implementar cambios en el mundo
+    real.
 
     \item Permite validar hipótesis y responder a preguntas de tipo ``¿qué
-pasaría si...?''.
+    pasaría si...?''.
 
     \item El diseño de la simulación permite ganar conocimiento sobre el
-sistema bajo investigación.
+    sistema bajo investigación.
 
     \item Permite cambiar los valores de entrada para observar cambios en las
-salidas, lo cual facilita una mayor comprensión sobre cuáles son las variables
-más relevantes y cómo interactúan.
+    salidas, lo cual facilita una mayor comprensión sobre cuáles son las
+    variables más relevantes y cómo interactúan.
 
     \item Proporciona una herramienta de gran valor pedagógico.
 
     \item Permite verificar soluciones analíticas.
 
     \item El tiempo es artificial, y por lo tanto puede ser contraído (simular
-meses o años de funcionamiento de un sistema en algunos minutos), expandido
-(observar cambios que de otra forma serían demasiado rápidos) e incluso pausado
-y avanzado manualmente.
+    meses o años de funcionamiento de un sistema en algunos minutos), expandido
+    (observar cambios que de otra forma serían demasiado rápidos) e incluso
+    pausado y avanzado manualmente.
 
     \item El concepto básico de una simulación es fácil de interpretar, por lo
-tanto puede ser una herramienta útil a la hora de justificar decisiones a
-clientes, inversores, gestores, etc.
+    tanto puede ser una herramienta útil a la hora de justificar decisiones a
+    clientes, inversores, gestores, etc.
 
     \item Puede ser más creíble que un modelo matemático resuelto de forma
-analítica, porque necesita hacer menos simplificaciones.
+    analítica, porque necesita hacer menos simplificaciones.
 \end{itemize}
 
 La simulación de eventos discretos involucra el modelado de un sistema y su
@@ -108,27 +110,28 @@ programas es común encontrar los siguientes componentes:
 
 \begin{itemize}
     \item Estado del sistema: colección de variables necesarias para describir
-el sistema en un punto particular del tiempo.
+    el sistema en un punto particular del tiempo.
 
     \item Reloj de simulación: una variable especial para llevar cuenta del
-tiempo.
+    tiempo.
 
     \item Lista de eventos: una lista con los eventos futuros.
 
     \item Contadores: variables usadas para almacenar información estadística
-sobre el desempeño del sistema.
+    sobre el desempeño del sistema.
 
     \item Fuentes de variables aleatorias para las distribuciones más comunes.
 
     \item Herramientas de recolección y manipulación de datos, procesamiento
-estadístico y representación visual de los mismos.
+    estadístico y representación visual de los mismos.
 
     \item Interfaz gráfica que proporciona una representación visual del
-sistema (en dos o tres dimensiones), mostrando animaciones que ayudan al
-seguimiento de los cambios de estado.
+    sistema (en dos o tres dimensiones), mostrando animaciones que ayudan al
+    seguimiento de los cambios de estado.
 \end{itemize}
 
-Las fuentes consultadas en la confección de este capítulo fueron [1], [2], [3].
+Las fuentes consultadas en la confección de este capítulo fueron \cite{law},
+\cite{banks}, \cite{shannon}.
 
 \section{Simulador \omnetpp{}}
 
@@ -335,32 +338,36 @@ modelos de dominios específicos, algunos de los cuales se listan a
 continuación:
 
 \begin{itemize}
-    \item INET Framework [7] provee soporte para simulaciones de redes de
-comunicación que utilizan los protocolos de Internet (TCP, UDP, IPv4, IPv6,
-OSPF, BGP, etc.), así como protocolos cableados e inalámbricos de la capa de
-enlace (Ethernet, PPP, IEEE 802.11, etc.) y soporte para redes móviles,
-protocolos MANET (Mobile Ad Hoc Networks), DiffServ, etc. Muchos otros
-proyectos toman INET como base y la extienden en direcciones específicas, como
-redes de vehículos, overlay, P2P, LTE.
+    \item INET Framework (\url{https://inet.omnetpp.org}) provee soporte para
+    simulaciones de redes de comunicación que utilizan los protocolos de
+    Internet (TCP, UDP, IPv4, IPv6, OSPF, BGP, etc.), así como protocolos
+    cableados e inalámbricos de la capa de enlace (Ethernet, PPP, IEEE 802.11,
+    etc.) y soporte para redes móviles, protocolos MANET (Mobile Ad Hoc
+    Networks), DiffServ, etc. Muchos otros proyectos toman INET como base y la
+    extienden en direcciones específicas, como redes de vehículos, overlay,
+    P2P, LTE.
 
-    \item Simu5G [8][9] producto de un proyecto de investigación conjunta entre
-Intel Corporation y el Computer Networking Group de la Universidad de Pisa,
-Italia, provee soporte para redes 5G NewRado.
+    \item Simu5G (\url{http://simu5g.org/}) producto de un proyecto de
+    investigación conjunta entre Intel Corporation y el Computer Networking
+    Group de la Universidad de Pisa, Italia, provee soporte para redes 5G
+    NewRado \cite{Simu5G}.
 
-    \item SimulLTE [10][11] provee librerías para la simulación de redes LTE y
-LTA.
+    \item SimulLTE (\url{https://simulte.com/}) provee librerías para la
+    simulación de redes LTE y LTA \cite{SimuLTE}.
 
-    \item Veins [12][13] es un framework de simulación de código abierto de IVC
-(Inter-Vehicular Communication) que utiliza \omnetpp{} para la simulación de
-redes así como SUMO, un simulador de tráfico vehicular, usando cosimulación.
+    \item Veins (\url{https://veins.car2x.org}) es un framework de simulación
+    de código abierto de IVC (Inter-Vehicular Communication) que utiliza
+    \omnetpp{} para la simulación de redes así como SUMO, un simulador de
+    tráfico vehicular, usando cosimulación \cite{Veins}.
 
-    \item CoRE4INET[14] es una extensión a la herramienta INET para
-simulaciones basadas en eventos de real-time Ethernet dentro del simulador
-\omnetpp{}.
-
+    \item CoRE4INET
+    (\url{https://core-researchgroup.de/projects/simulation.html}) es una
+    extensión a la herramienta INET para simulaciones basadas en eventos de
+    real-time Ethernet dentro del simulador \omnetpp{}.
 \end{itemize}
 
-Una lista completa puede conseguirse visitando el sitio de \omnetpp{} [16].
+Una lista completa puede conseguirse visitando el sitio web de
+\href{https://omnetpp.org/download/models-and-tools}{\omnetpp{}}.
 
 Desde el año 2008 en forma continuada, la comunidad de \omnetpp{} se reúne
 anualmente en un evento en el que se comparten experiencias, casos de usos y se
@@ -370,35 +377,36 @@ presentados:
 
 \begin{itemize}
     \item Development and Testing of Automotive Ethernet-Networks together in
-one Tool - \omnetpp{} (Patrick Wunner, Stefan May, Kristian Trenkel, and
-Sebastian Dengler)
+    one Tool - \omnetpp{} (Patrick Wunner, Stefan May, Kristian Trenkel, and
+    Sebastian Dengler)
 
     \item Implementation of an Adaptive Energy-efficient MAC Protocol in
-\omnetpp{} / MiXiM (Van Thiep Nguyen, Matthieu Gautier, and Olivier Berder)
+    \omnetpp{} / MiXiM (Van Thiep Nguyen, Matthieu Gautier, and Olivier Berder)
 
     \item Attack of the Ants: Studying Ant Routing Algorithms in Simulation and
-Wireless Testbeds (Michael Frey and Mesut Günes)
+    Wireless Testbeds (Michael Frey and Mesut Günes)
 
     \item Modeling Quantum Optical Components, Pulses and Fiber Channels Using
-\omnetpp{} (Ryan D. L. Engle, Douglas D. Hodson, Michael R. Grimaila, Logan O.
-Mailloux, Colin V. McLaughlin and Gerald Baumgartner)
+    \omnetpp{} (Ryan D. L. Engle, Douglas D. Hodson, Michael R. Grimaila, Logan
+    O.  Mailloux, Colin V. McLaughlin and Gerald Baumgartner)
 
     \item High Frequency Radio Network Simulation Using \omnetpp{} (Jeffery
-Weston and Eric Koski)
+    Weston and Eric Koski)
 
     \item Stacked-VLAN-Based Modeling of Hybrid ISP Traffic Control Schemes and
-Service Plans Exploiting Excess Bandwidth in Shared Access Networks (Kyeong Soo
-Kim)
+    Service Plans Exploiting Excess Bandwidth in Shared Access Networks (Kyeong
+    Soo Kim)
 
     \item DoS Protection through Credit Based Metering - Simulation Based
-Evaluation for Time-Sensitive Networking in Cars (Philipp Meyer, Timo Häckel,
-Franz Korf and Thomas Schmidt).
+    Evaluation for Time-Sensitive Networking in Cars (Philipp Meyer, Timo
+    Häckel, Franz Korf and Thomas Schmidt).
 \end{itemize}
 
 Para una lista completa se recomienda visitar la página oficial de los archivos
-de la conferencia. [17].
+de la conferencia \cite{summit}.
 
-Las fuentes consultadas en la confección de este capítulo fueron [4], [5], [6]
+Las fuentes consultadas en la confección de este capítulo fueron \cite{varga1},
+\cite{varga2}, \cite{opp_manual}.
 
 \section{Otras herramientas similares}
 
@@ -411,12 +419,12 @@ Python.
 \subsection{ns3}
 
 Herramienta orientada a la simulación de redes de comunicación, dirigido
-principalmente al uso académico y educativo [18]. Es un proyecto de código
-abierto, gratuito, liberado bajo la licencia GNU GPLv2 mantenido por su
+principalmente al uso académico y educativo. Es un proyecto de
+código abierto, gratuito, liberado bajo la licencia GNU GPLv2 mantenido por su
 comunidad. Está basado en C++ y parte de la API de simulación cuenta con
 ``bindings'' (enlaces) para Python que son generados automáticamente (hasta
 donde este proceso es automatizable) y cuya completitud y correctitud no es el
-principal objetivo del proyecto [19].
+principal objetivo del proyecto \cite{ns3page} \cite{ns3pagepython}.
 
 A diferencia de \omnetpp{}, la simulación y la visualización (depuración,
 trazabilidad) son temas separados. Por defecto, no presenta interfaz gráfica
@@ -444,8 +452,8 @@ facilidad para producir el binario adaptado a sus necesidades.
 
 NetSim parece ser un nombre bastante común para este tipo de software. En
 particular, aquí hablamos de la herramienta producida por la compañía india
-Tetcos [20]. NetSim v1 apareció en 2005 y se encuentra actualmente en la
-versión 13 (mayo 2021).
+Tetcos (\url{https://www.tetcos.com/}). NetSim v1 apareció en 2005 y se
+encuentra actualmente en la versión 13 (mayo 2021).
 
 Esta herramienta, escrita en lenguaje C, corre sobre plataformas Windows y se
 distribuye bajo diferentes licencias comerciales. Existe incluso una licencia
@@ -467,7 +475,7 @@ datos editando el código fuente de NetSim y volviendo a compilar.
 
 Se trata de una librería de código abierto para escribir simulaciones de
 eventos discretos en lenguaje Python, distribuida bajo una licencia MIT que
-posibilita su uso libre [21].
+posibilita su uso libre \cite{sympy}.
 
 La simulación se estructura alrededor del concepto de \textit{proceso}, que
 constituye el elemento activo de la simulación (un cliente, un coche, un nodo
@@ -511,9 +519,9 @@ Originado por Bjarne Stroustrup en 1979 como una extensión del lenguaje C que
 añadía soporte para programación orientada a objetos, C++ fue concebido para la
 programación de sistemas operativos y sistemas embebidos, así como para
 software con recursos escasos, con metas tales como performance y eficiencia.
-Ha sido utilizado en muchos otros contextos [22], como ser aplicaciones de
-escritorio, videojuegos, servidores, y también en aplicaciones de alta
-criticidad (enlaces telefónicos o sondas espaciales).
+Ha sido utilizado en muchos otros contextos \cite{stroustrup}, como ser
+aplicaciones de escritorio, videojuegos, servidores, y también en aplicaciones
+de alta criticidad (enlaces telefónicos o sondas espaciales).
 
 Se trata de un lenguaje compilado, por lo que se puede utilizar en cualquier
 plataforma para la cual exista un compilador de C++.
@@ -531,7 +539,8 @@ un lenguaje fácil de escribir y de leer, poniendo el acento en que el tiempo de
 las personas es más valioso que el tiempo del CPU.
 
 El desarrollo y crecimiento del lenguaje es guiado por una organización sin
-fines de lucro llamada Python Software Foundation [25].
+fines de lucro llamada \href{https://www.python.org/psf/}{Python Software
+Foundation}.
 
 \subsection{Sintaxis}
 
@@ -569,18 +578,18 @@ No existe un único intérprete de Python. El más popular y difundido, conocido
 como ``cPython'', es el intérprete de referencia de Guido Van Rossum (creador
 del lenguaje) escrito en C. Puede considerarse la implementación oficial: se lo
 referencia como ``Python'' y se usa el término ``cPython'' (como en este
-párrafo) cuando se busca distinguirlo de otras implementaciones [23].
+párrafo) cuando se busca distinguirlo de otras implementaciones \cite{pythonimpl}.
 
 Notar que el término ``Python'' tiene (al menos) dos significados:
 
 \begin{itemize}
     \item Es un lenguaje de programación definido mediante ciertas reglas
-sintácticas que delimitan las cadenas de caracteres que constituyen un programa
-válido y las separan de aquellas que, contrariamente, no son programas válidos
-[24].
+    sintácticas que delimitan las cadenas de caracteres que constituyen un
+    programa válido y las separan de aquellas que, contrariamente, no son
+    programas válidos (ver \url{https://docs.python.org/3/reference/grammar.html}).
 
     \item Es un binario que sirve de intérprete (ejecutor) de ciertos programas
-escritos usando tales reglas sintácticas.
+    escritos usando tales reglas sintácticas.
 \end{itemize}
 
 A lo largo de este trabajo, cuando hablamos de ``Python'' nos referimos al
@@ -644,15 +653,15 @@ pero estos tipos no son expresados como parte del programa). En general, esto
 conduce a programas más fáciles de escribir y de leer, aunque no permite
 detectar errores de tipos si no hasta que el código es ejecutado. Esto último,
 sin embargo, no es visto como un problema en Python, por el contrario, se dice
-que Python utiliza duck typing [26] (tipado del ``pato''), explicándolo con la
-frase ``si camina como un pato y hace el sonido de un pato, entonces es un
-pato''. En la práctica, esto quiere decir que Python favorece el paradigma en el
-cual un objeto sirve en cualquier circunstancia donde pueda hacer lo que se
-espera de él, independientemente de si tiene un tipo u otro. No se chequean los
-tipos de los objetos (de hecho, herramientas del lenguaje que permiten hacerlo
-como la función ``isinstance'', generan fuertes opiniones en contra de su uso
-[27]) si no que se espera que un objeto pueda proveer el comportamiento
-necesario (interfaz).
+que Python utiliza duck typing \cite{duck} (tipado del ``pato''), explicándolo
+con la frase ``si camina como un pato y hace el sonido de un pato, entonces es
+un pato''. En la práctica, esto quiere decir que Python favorece el paradigma
+en el cual un objeto sirve en cualquier circunstancia donde pueda hacer lo que
+se espera de él, independientemente de si tiene un tipo u otro. No se chequean
+los tipos de los objetos (de hecho, herramientas del lenguaje que permiten
+hacerlo como la función ``isinstance'', generan fuertes opiniones en contra de
+su uso \cite{isinstance}) si no que se espera que un objeto pueda proveer el
+comportamiento necesario (interfaz).
 
 \subsection{Ecosistema}
 
@@ -731,12 +740,12 @@ el intérprete. Pero, a su vez, tiene costos:
 
 \begin{itemize}
     \item El algoritmo del Garbage Collector necesita tiempo para correr, y
-este tiempo es en detrimento de la ejecución de nuestra aplicación
+    este tiempo es en detrimento de la ejecución de nuestra aplicación
 
     \item El diseño de la gestión de la memoria busca minimizar el número de
-llamadas al sistema operativo y suele pedir recursos en bloques grandes, para
-gestión interna, conduciendo a aplicaciones que generalmente reservan más
-memoria de la estrictamente necesaria.
+    llamadas al sistema operativo y suele pedir recursos en bloques grandes,
+    para gestión interna, conduciendo a aplicaciones que generalmente reservan
+    más memoria de la estrictamente necesaria.
 \end{itemize}
 
 Otra razón por lo que los programas hechos en Python suelen usar más memoria
@@ -746,12 +755,13 @@ representados mediante objeto Python, lo cual ocupa mucho más que 4 bytes.
 
 \subsection{C++ y Python como lenguajes de enseñanza}
 
-Numerosos estudios comparativos entre Python y C++ [28][30]  señalan que el
-primero es menos eficiente que el segundo (en términos de tiempo y espacio), en
-general por varios órdenes de magnitud. Sin embargo, se señala que los
-programas hechos en Python son más fáciles de entender y modificar. En general,
-las mismas características de C++ que lo hacen un lenguaje poderoso para
-administrar los recursos disponibles, son aquellas que lo convierten en un
-lenguaje más difícil, propenso a errores en manos no expertas. Se ha señalado
-que Python es un lenguaje más amigable para novatos y más apropiado para la
-enseñanza de conceptos en ciencias de la computación [29].
+Numerosos estudios comparativos entre Python y C++
+\cite{zehra}\cite{Abdulkareem} muestran que el primero es menos eficiente que
+el segundo (en términos de tiempo y espacio), en general por varios órdenes de
+magnitud. Sin embargo, se señala que los programas hechos en Python son más
+fáciles de entender y modificar. En general, las mismas características de C++
+que lo hacen un lenguaje poderoso para administrar los recursos disponibles,
+son aquellas que lo convierten en un lenguaje más difícil, propenso a errores
+en manos no expertas. Se ha señalado que Python es un lenguaje más amigable
+para novatos y más apropiado para la enseñanza de conceptos en ciencias de la
+computación \cite{fraire}.
