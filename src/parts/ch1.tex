@@ -1,31 +1,36 @@
 \chapter{Introducción}
 \section{Objetivo}
 
-El objetivo de esta tesis es proveer de una interfaz simple y compacta para
-especificar el comportamiento de modelos de simulación para la plataforma
-\omnetpp{} mediante el uso del lenguaje Python.
+El objetivo de esta tesis es proveer una interfaz simple y compacta para
+especificar el comportamiento de modelos en el simulador de eventos discretos
+\omnetpp{} mediante el uso del lenguaje Python, eliminando toda necesidad de
+conocer C++ para utilizar dicho simulador.
 
 \section{Hipótesis}
 
-Es posible definir módulos simples de \omnetpp{} en scripts escritos en Python e
-integrarlos de manera que el usuario experimente mínima o nula complejidad en el
-proceso.
+Es posible definir módulos simples de \omnetpp{} en el lenguaje de programación
+Python (en reemplazo de C++) e integrarlos en una simulación de manera que el
+usuario experimente mínima o nula complejidad en el proceso.
 
 \section{Metodología}
 
 La metodología en la que se basa esta tesis es extender y embeber el intérprete
 de Python para que pueda recibir y transmitir comportamiento desde y hacia C++.
+A su vez, se hace un análisis de la arquitectura del proyecto \omnetpp{} para
+encontrar formas de intervenirlo y habilitar la integración con Python.
 
 \section{Impacto}
 
-El resultado del trabajo (disponible en \url{https://github.com/mmodenesi/omnetpy/})
-resulta beneficioso para personas que buscan aprovechar la plataforma \omnetpp{}
-para realizar simulaciones, pero para quienes la programación directa en C++
-resulta un obstáculo. En particular, facilita la utilización de \omnetpp{} como
-herramienta pedagógica en cursos de ciencias de computación donde los
+Este trabajo\footnote{Disponible en
+\url{https://github.com/mmodenesi/omnetpy/}} resulta beneficioso para todas
+aquellas personas que quieren aprovechar la plataforma \omnetpp{} para realizar
+simulaciones, pero para quienes la programación directa en C++ resulta un
+obstáculo. En particular, facilita la utilización de \omnetpp{} como
+herramienta pedagógica en cursos de ciencias de computación donde las y los
 estudiantes suelen contar con un dominio bastante bueno de Python, pero en
-general desconocen C++.  El interés de este proyecto ha sido reconocido por los
-desarrolladores de \omnetpp{} \footnote{Ver \url{https://omnetpp.org/download-items/omnetpy.html}}.
+general desconocen C++. El interés de este proyecto ha sido reconocido por el
+equipo que desarrolla \omnetpp{}\footnote{Ver
+\url{https://omnetpp.org/download-items/omnetpy.html}}.
 
 \section{Estructura}
 

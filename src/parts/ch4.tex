@@ -192,21 +192,19 @@ de ellas ha sido invocada. Lo que sigue es diferente:
 
 \inputminted{c++}{codelistings/define_module_4.cc}
 
-Esto es una declaración e inicialización de una variable estática de tipo
-\verb!omnetpp::CodeFragments! llamada \verb!__onstartup_obj_13! (si bien el
-nombre es irrelevante). Al tratarse de una variable estática, su inicialización
-ocurre al comenzar la ejecución del programa. Es decir que antes de que la
-función \verb!main! sea invocada, esta llamada a constructor ya se ejecutó y
-por lo tanto la instancia de \verb!CodeFragments! que se acaba de crear ya se
-encuentra formando parte de la lista global de \verb!CodeFragments!. Por lo
-tanto, el resultado final de la instanciación de esta variable es la colocación
-de \verb!__onstartup_func_13!  de para ser ejecutada durante la etapa de
-STARTUP de la función \verb!setupUserInterface!. Más aún, cuando esa función se
-ejecute, el resultado es que se registra ante \omnetpp{} un tipo de módulo
-simple nuevo (\verb!Txc1!) así como las funciones necesarias para su creación y
-casteo. Esto permitirá a \omnetpp{} crear y manipular instancias de \verb!Txc1!
-cuando sea necesario (según lo dicten los archivos de descripción de la
-topología de la red).
+Esto es una declaración e inicialización de una variable estática. Como
+tal, su inicialización ocurre al comenzar la ejecución del programa. Es decir
+que antes de que la función \verb!main! sea invocada, esta llamada a
+constructor ya se ejecutó y por lo tanto la instancia de \verb!CodeFragments!
+que se acaba de crear ya se encuentra formando parte de la lista global de
+\verb!CodeFragments!. Por lo tanto, el resultado final de la instanciación de
+esta variable es la colocación de \verb!__onstartup_func_13!  de para ser
+ejecutada durante la etapa de STARTUP de la función \verb!setupUserInterface!.
+Más aún, cuando esa función se ejecute, el resultado es que se registra ante
+\omnetpp{} un tipo de módulo simple nuevo (\verb!Txc1!) así como las funciones
+necesarias para su creación y casteo. Esto permitirá a \omnetpp{} crear y
+manipular instancias de \verb!Txc1!  cuando sea necesario (según lo dicten los
+archivos de descripción de la topología de la red).
 
 En resumidas palabras, el macro \verb!Define_Module(T)!  (donde \verb!T! es la
 clase definida por el usuario) sirve para:
@@ -289,8 +287,9 @@ trabajo que se estaba realizando.
 \inputminted{c++}{codelistings/binding.cc}
 
 Luego de la compilación de ese archivo en C++ se obtiene un módulo en Python
-que expone las clases \verb!cSimpleModule!, cMessage así como algunos de sus
-métodos. Es decir, estamos en condiciones de escribir en Python algo como:
+que expone las clases \verb!cSimpleModule!, \verb!cMessage!, así como algunos
+de sus métodos. Es decir, estamos en condiciones de escribir en Python algo
+como:
 
 \inputminted{Python}{codelistings/binding_usage.py}
 

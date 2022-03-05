@@ -45,12 +45,6 @@ En una simulación, el modelo no es resuelto, sino que es \textit{ejercitado}
 con el fin de recolectar información a partir de la cual se puedan realizar
 estimaciones sobre los valores de los parámetros de interés.
 
-
-En los modelos estáticos no es relevante el paso del tiempo. Un ejemplo de
-simulación de este tipo lo ofrece el método Monte Carlo. En los modelos
-dinámicos, en cambio, el tiempo es relevante ya que se estudia la evolución del
-sistema a través de una línea temporal artificial.
-
 La construcción de una simulación ofrece las siguientes ventajas:
 \begin{itemize}
     \item Nuevas políticas, procedimientos de operación, reglas de decisión,
@@ -84,9 +78,14 @@ La construcción de una simulación ofrece las siguientes ventajas:
     tanto puede ser una herramienta útil a la hora de justificar decisiones a
     clientes, inversores, gestores, etc.
 
-    \item Puede ser más creíble que un modelo matemático resuelto de forma
+    \item Puede ser más confiable que un modelo matemático resuelto de forma
     analítica, porque necesita hacer menos simplificaciones.
 \end{itemize}
+
+En los modelos estáticos no es relevante el paso del tiempo. Un ejemplo de
+simulación de este tipo lo ofrece el método Monte Carlo. En los modelos
+dinámicos, en cambio, el tiempo es relevante ya que se estudia la evolución del
+sistema a través de una línea temporal artificial.
 
 La simulación de eventos discretos involucra el modelado de un sistema y su
 evolución mediante una representación en la cual las variables de estado
@@ -217,7 +216,7 @@ módulos compuestos y definiciones de la red:
 interfaz externa (compuertas y parámetros) así como la definición de sus
 submódulos y sus interconexiones.
 
-    \item La definición de una red típicamente define al modelo como una
+    \item La definición de una red típicamente declara al modelo como una
 instancia de un módulo particular.
 \end{itemize}
 
@@ -254,10 +253,10 @@ clase \verb!cSimpleModule!, que es parte de las librerías de simulación de
 \end{itemize}
 
 En el paradigma basado en corrutinas, el código del modelo corre en su propio
-hilo, el cual recibe el control del kernel cada vez que el módulo recibe un
-mensaje. Típicamente, este código nunca incluye un \verb!return!: sus puntos de
-entrada son llamadas a \verb!receive! (esperar el siguiente mensaje) y sus
-puntos de salida son llamadas a \verb!send! (enviar un mensaje)
+hilo, el cual recibe el control del kernel de simulación cada vez que el módulo
+recibe un mensaje. Típicamente, este código nunca incluye un \verb!return!: sus
+puntos de entrada son llamadas a \verb!receive! (esperar el siguiente mensaje)
+y sus puntos de salida son llamadas a \verb!send! (enviar un mensaje)
 
 En el paradigma basado en el procesamiento de eventos, el kernel de simulación
 llama a una función específica del módulo (\verb!handleMessage!) con el mensaje
@@ -289,7 +288,7 @@ aleatorias, cuánto tiempo puede durar como máximo la simulación, etc.
 \paragraph{Entorno de desarrollo integrado}
 
 La edición de los diferentes archivos que intervienen (archivos de C++,
-archivos NED, archivos ini) puede realizarse cómodamente desde un Entorno de
+archivos NED, archivos \texttt{ini}) puede realizarse cómodamente desde un Entorno de
 Desarrollo Integrado (IDE, por sus siglas en inglés) que es parte de la
 distribución oficial de \omnetpp{}. Las ventajas de programar desde este IDE son
 múltiples:
@@ -331,11 +330,12 @@ lote).
 
 \subsection{Ecosistema y casos de uso}
 
-Desde sus comienzos, cerca del año 2000, \omnetpp{} ha tenido una amplia recepción
-en entornos de investigación, educativos, así como también en la industria.
-Diversos proyectos independientes han aportado nuevas librerías reutilizables y
-modelos de dominios específicos, algunos de los cuales se listan a
-continuación:
+Desde sus comienzos, cerca del año 2000, \omnetpp{} ha tenido una amplia
+recepción en entornos de investigación, educativos, así como también en la
+industria.  Diversos proyectos independientes han aportado nuevas librerías
+reutilizables y modelos de dominios específicos, algunos de los cuales se
+listan a continuación\footnote{Para una lista completa, visitar
+\url{https://omnetpp.org/download/models-and-tools}}.
 
 \begin{itemize}
     \item INET Framework (\url{https://inet.omnetpp.org}) provee soporte para
@@ -365,9 +365,6 @@ continuación:
     extensión a la herramienta INET para simulaciones basadas en eventos de
     real-time Ethernet dentro del simulador \omnetpp{}.
 \end{itemize}
-
-Una lista completa puede conseguirse visitando el sitio web de
-\href{https://omnetpp.org/download/models-and-tools}{\omnetpp{}}.
 
 Desde el año 2008 en forma continuada, la comunidad de \omnetpp{} se reúne
 anualmente en un evento en el que se comparten experiencias, casos de usos y se
@@ -403,7 +400,7 @@ presentados:
 \end{itemize}
 
 Para una lista completa se recomienda visitar la página oficial de los archivos
-de la conferencia \cite{summit}.
+de la conferencia en \url{https://summit.omnetpp.org/archive/}.
 
 Las fuentes consultadas en la confección de este capítulo fueron \cite{varga1},
 \cite{varga2}, \cite{opp_manual}.
@@ -481,18 +478,18 @@ La simulación se estructura alrededor del concepto de \textit{proceso}, que
 constituye el elemento activo de la simulación (un cliente, un coche, un nodo
 de una red), haciendo uso de generadores.
 
-Los procesos se programan utilizando generadores.  En Python, un generador es
-un tipo especial de función que incluye la palabra reservada \verb!yield!. Al
-ejecutar la instrucción \verb!yield!, la función es pausada y el control
-retorna al código que la llamó. Posteriormente, la ejecución de la corrutina se
-puede reanudar, desde el mismo punto donde cedió el control. Esta
-característica del lenguaje Python ofrece un recurso que SimPy utiliza para
-estructurar la simulación, en un modelo de corrutinas (funciones que ceden el
-control voluntariamente en lo que se denomina concurrencia cooperativa).
+En Python, un generador es un tipo especial de función que incluye la palabra
+reservada \verb!yield!. Al ejecutar la instrucción \verb!yield!, la función es
+pausada y el control retorna al código que la llamó. Posteriormente, la
+ejecución de la corrutina se puede reanudar, desde el mismo punto donde cedió
+el control.
 
-Estos generadores crean eventos y ceden el control al orquestador de la
-simulación cuando ejecutan un \verb!yield!. Cuando el evento \textit{ocurre}
-(llega su momento en el tiempo de la simulación) el proceso continúa.
+Esta característica del lenguaje Python ofrece un recurso que SimPy utiliza
+para estructurar la simulación, en un modelo de corrutinas (funciones que ceden
+el control voluntariamente en lo que se denomina concurrencia cooperativa). Los
+generadores crean eventos y ceden el control al orquestador de la simulación
+cuando ejecutan un \verb!yield!. Cuando el evento \textit{ocurre} (llega su
+momento en el tiempo de la simulación) el proceso continúa.
 
 Simpy incluye también funcionalidad para modelar el uso de recursos
 compartidos y la interacción de procesos.
