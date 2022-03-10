@@ -8,24 +8,30 @@ main(int argc, char *argv[])
     PyObject *pArgs, *pValue;
     int i;
 
+    /* chequeo de argumentos */
     if (argc < 3) {
         fprintf(stderr, "Usage: call pythonfile funcname [args]\n");
         return 1;
     }
 
+    /* inizialización del intérprete */
     Py_Initialize();
+
+    /* Se omite el chequeo de errores de pName */
     pName = PyUnicode_DecodeFSDefault(argv[1]);
 
-    /* Error checking of pName left out */
-
+    /* se importa el módulo */
     pModule = PyImport_Import(pName);
+
+    /* la variable pName ya no es necesaria */
     Py_DECREF(pName);
 
     if (pModule != NULL) {
+        /* obtenemos una referencia a la función */
         pFunc = PyObject_GetAttrString(pModule, argv[2]);
-        /* pFunc is a new reference */
 
         if (pFunc && PyCallable_Check(pFunc)) {
+            /* construimos los argumentos que le pasaremos a la función */
             pArgs = PyTuple_New(argc - 3);
             for (i = 0; i < argc - 3; ++i) {
                 pValue = PyLong_FromLong(atoi(argv[i + 3]));
@@ -35,9 +41,9 @@ main(int argc, char *argv[])
                     fprintf(stderr, "Cannot convert argument\n");
                     return 1;
                 }
-                /* pValue reference stolen here: */
                 PyTuple_SetItem(pArgs, i, pValue);
             }
+            /* llamada a la función */
             pValue = PyObject_CallObject(pFunc, pArgs);
             Py_DECREF(pArgs);
             if (pValue != NULL) {

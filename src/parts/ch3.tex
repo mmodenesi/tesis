@@ -187,24 +187,25 @@ más alineado con lo que queremos realizar. No obstante, ambos enfoques son
 necesarios:
 
 \begin{description}
-    \item[Debemos extender el intérprete de Python] para que usuarios puedan
-    heredar de \verb!cSimpleModule! al especificar el funcionamiento de sus
-    módulos. El sistema sólo acepta módulos que son subclases de aquella. Si
-    esta tarea de especificación ha de realizarse en Python, como nos
-    proponemos, entonces es menester habilitar la escritura de algo como from
-    omnetpp import \verb!cSimpleModule! para comenzar a definir los módulos a
-    partir de dicha clase base. Se sigue que al menos parte del código de
-    \omnetpp{} debe ser expuesto al mundo de Python.
+    \item[Debemos extender el intérprete de Python] para que usuarios puedan heredar de \linebreak
+    \verb!cSimpleModule! al especificar el funcionamiento de sus módulos. El
+    sistema sólo acepta módulos que son subclases de aquella. Si esta tarea de
+    especificación ha de realizarse en Python, como nos proponemos, entonces es
+    menester habilitar la escritura de algo como
+    \verb!from omnetpp import cSimpleModule!
+    para comenzar a definir los módulos a partir de dicha clase base. Se sigue
+    que al menos parte del código de \omnetpp{} debe ser expuesto al mundo de
+    Python.
 
-    \item[Debemos embeber el intérprete de Python en \omnetpp{}] para que la
-    aplicación principal siga siendo el binario de simulación que se obtiene al
-    compilar un proyecto tradicional de \omnetpp{}. Si esto no fuera así,
-    deberíamos reescribir, entre otras cosas, el código de la interfaz de
-    usuario de las simulaciones.  Para conservar toda esa funcionalidad,
-    queremos que el binario que genera \omnetpp{} cambie lo menos posible, pero
-    que entre esos cambios se encuentre la capacidad de cargar módulos y
-    ejecutar clases escritas en Python. Esto impone la necesidad de inicializar
-    y finalizar un intérprete de Python (a su debido tiempo).
+    \item[Debemos embeber el intérprete de Python en \omnetpp{}] para que la aplicación \linebreak
+    principal siga siendo el binario de simulación que se obtiene al compilar
+    un proyecto tradicional de \omnetpp{}. Si esto no fuera así, deberíamos
+    reescribir, entre otras cosas, el código de la interfaz de usuario de las
+    simulaciones.  Para conservar toda esa funcionalidad, queremos que el
+    binario que genera \omnetpp{} cambie lo menos posible, pero que entre esos
+    cambios se encuentre la capacidad de cargar módulos y ejecutar clases
+    escritas en Python. Esto impone la necesidad de inicializar y finalizar un
+    intérprete de Python (a su debido tiempo).
 \end{description}
 
 \begin{figure}[h]
@@ -269,14 +270,14 @@ Existen en el ecosistema de la creación de bindings y wrappers varios proyectos
 que buscan resolver este problema de forma más genérica. Algunos de ellos son:
 
 \begin{itemize}
-    \item swig [34] (\url{http://swig.org}): herramienta para la generación de
+    \item swig (\url{http://swig.org}): herramienta para la generación de
     código mediante el cual se puede conectar una aplicación hecha en C o C++
     con una variedad de lenguajes de programación. Típicamente se utiliza para
     parsear el código en C o C++ y proveer el código necesario para exponerlo
     en el lenguaje de destino.
 
-    \item boost.Python
-    (\url{https://www.boost.org/doc/libs/1_77_0/libs/python/doc/html/index.html}):
+    \item boost
+    (\url{https://www.boost.org/doc/libs/1_77_0/libs/python/doc}):
     librería hecha en C++ con el objetivo de proveer integración entre C++ y
     Python. Facilita la tarea de exponer proyectos hechos en C++ como módulos
     de Python disminuyendo la cantidad de código que el usuario debe escribir
