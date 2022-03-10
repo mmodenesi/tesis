@@ -19,8 +19,9 @@ que contribuyen a entender la solución encontrada.
 Cuando el usuario ejecuta el binario de una simulación el inicio de la
 ejecución ocurre en la función main donde únicamente se llama a
 \verb!omnetpp::envir::evMain! con los argumentos recibidos del sistema
-operativo. En esta última función se llama a \verb!setupUserInterface!,
-nuevamente pasando los argumentos de invocación del programa.
+operativo. En esta última función se llama a \linebreak
+\verb!setupUserInterface!, nuevamente pasando los argumentos de invocación del
+programa.
 
 Esta función presenta tres etapas claramente señaladas mediante comentarios en
 el código:
@@ -125,7 +126,7 @@ manejo de errores):
     \item llama al método de clase \verb!cObjectFactory::createOne(className)!
 
     \item el método de clase busca en el \verb!cGlobalRegistrationList! llamado
-classes a el \verb!cObjectFactory! apropiado para tal nombre de clase
+\verb!classes! al \verb!cObjectFactory! apropiado para tal nombre de clase
 
     \item una vez identificado el \verb!cObjectFactory! adecuado, se llama a la
 función de creación que este contiene.
@@ -270,7 +271,7 @@ de forma de poder realizar los casteos a los tipos de C++ que espera \omnetpp{}.
 
 \subsection{\texttt{PySimpleModule}: heredando \texttt{cSimpleModule} en Python}
 
-Comenzamos a trabajar en extender el intérprete de Python con las clases de
+Comenzamos a trabajar en extender el intérprete de Python con las clases de\linebreak
 \omnetpp{}. En una primera etapa se trabajó en exponer sólo aquello que era
 estrictamente necesario para lograr la implementación de la primera parte del
 tutorial tictoc: las clases \verb!cSimpleModule! con los métodos
@@ -550,7 +551,8 @@ anterior:
 \inputminted{c++}{codelistings/pytxc.cc}
 
 Donde la clase \verb!PyTxc! está definida en el archivo \verb!txc.py!, y se
-asume que el mismo importable (esto es, \verb!import txc! no produce errores).
+asume que el mismo puede ser importado sin errores (esto es, \verb!import txc!
+no produce errores).
 
 \section{Generalización}
 
@@ -617,13 +619,13 @@ simulador de eventos discretos:
 
 \begin{itemize}
     \item recolección de métricas (clases \verb!cStatistic!, \verb!cStdDev!,
-\verb!cAbstractHistogram!, \verb!cHistogram!, \verb!cHistogramStrategy!,
-\verb!cOutVector!),
+    \verb!cAbstractHistogram!, \linebreak \verb!cHistogram!,
+    \verb!cHistogramStrategy!, \verb!cOutVector!),
 
     \item acceso al tiempo de simulación (clase \verb!cSimTime!),
 
     \item manipulación de la representación gráfica de la simulación (clases
-\verb!cCanvas!, \verb!cDisplayString!)
+    \verb!cCanvas!, \linebreak \verb!cDisplayString!)
 
     \item parametrización de experimentos (clase \verb!cPar!)
 
@@ -848,12 +850,12 @@ nuestro ejemplo habitual:
 
 \inputminted{Python}{codelistings/txc1.py}
 
-Es claro que la variable local msg es la única referencia al mensaje creado. Al
-finalizar esta función, el algoritmo de conteo de referencias de Python actuará
-y se eliminará el objeto. Esto ocasionará el borrado del objeto que existe del
-lado de C++. En este momento, \omnetpp{} se quejará de que el mensaje aún no debía
-ser borrado, dado que este está en el kernel de la simulación. Fin del
-programa.
+Es claro que la variable local \verb!msg! es la única referencia al mensaje
+creado. Al finalizar esta función, el algoritmo de conteo de referencias de
+Python actuará y se eliminará el objeto. Esto ocasionará el borrado del objeto
+que existe del lado de C++. En este momento, \omnetpp{} se quejará de que el
+mensaje aún no debía ser borrado, dado que este está en el kernel de la
+simulación. Fin del programa.
 
 Para evitar esto, se recurrió a una solución en Python puro. Se hizo un wrapper
 de la clase \verb!cMessage! cuyo inicializador guarda una referencia extra al objeto

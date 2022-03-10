@@ -1,8 +1,3 @@
-/*
- * Python bindings for OMNeT++ classes
- *
- */
-
 #include <pybind11/pybind11.h>
 #include "omnetpp/csimplemodule.h"
 #include "omnetpp/cmessage.h"
@@ -10,6 +5,8 @@
 using namespace omnetpp;
 namespace py = pybind11;
 
+/* una clase que hereda de cSimpleModule (OMNeT++)
+ * para exponer algunos métodos virtuales */
 class cSimpleModulePublicist : public cSimpleModule {
 public:
     using cSimpleModule::handleMessage;
@@ -18,6 +15,7 @@ public:
     using cSimpleModule::getName;
 };
 
+/* la clase que va a ver el intŕeprete de Python */
 class PycSimpleModule : public cSimpleModule {
 public:
     using cSimpleModule::cSimpleModule;
@@ -32,6 +30,7 @@ public:
     ~PycSimpleModule() {}
 };
 
+/* definición del módulo */
 PYBIND11_MODULE(pyopp, m) {
 
     m.doc() = "The Python binding for OMNeT++";

@@ -203,8 +203,9 @@ configuración, o pueden ser tomados de una fuente de valores aleatorios.
 
 \paragraph{El lenguaje NED}
 
-NED es un lenguaje declarativo creado específicamente para \omnetpp{}, en el cual
-el usuario define la estructura del modelo (módulos e interconexiones).
+NED es un lenguaje declarativo que fue creado específicamente para \omnetpp{},
+en el cual el usuario define la estructura del modelo (módulos e
+interconexiones).
 
 Una definición de modelo puede constar de declaraciones de módulos simples,
 módulos compuestos y definiciones de la red:
@@ -360,10 +361,9 @@ listan a continuación\footnote{Para una lista completa, visitar
     \omnetpp{} para la simulación de redes así como SUMO, un simulador de
     tráfico vehicular, usando cosimulación \cite{Veins}.
 
-    \item CoRE4INET
-    (\url{https://core-researchgroup.de/projects/simulation.html}) es una
-    extensión a la herramienta INET para simulaciones basadas en eventos de
-    real-time Ethernet dentro del simulador \omnetpp{}.
+    \item CoRE4INET (\url{https://core-researchgroup.de/projects/simulation.html})\linebreak
+    es una extensión a la herramienta INET para simulaciones basadas en eventos
+    de real-time Ethernet dentro del simulador \omnetpp{}.
 \end{itemize}
 
 Desde el año 2008 en forma continuada, la comunidad de \omnetpp{} se reúne
@@ -383,7 +383,7 @@ presentados:
     \item Attack of the Ants: Studying Ant Routing Algorithms in Simulation and
     Wireless Testbeds (Michael Frey and Mesut Günes)
 
-    \item Modeling Quantum Optical Components, Pulses and Fiber Channels Using
+    \item Modeling Quantum Optical Components, Pulses and Fiber Channels Using\linebreak
     \omnetpp{} (Ryan D. L. Engle, Douglas D. Hodson, Michael R. Grimaila, Logan
     O.  Mailloux, Colin V. McLaughlin and Gerald Baumgartner)
 
@@ -561,7 +561,7 @@ Esto agrega un nivel de dificultad más a la sintaxis de C++, ya que lo que el
 programador escribe, no suele ser exactamente igual a lo que el compilador
 recibe para convertir a binario.
 
-Python no es un lenguaje compilado, como C++, C o go, si no que es un lenguaje
+Python no es un lenguaje compilado, como C++ o C, si no que es un lenguaje
 interpretado: el código fuente no es convertido directamente a código máquina
 para su ejecución en un procesador. El código escrito en Python debe ser
 proporcionado a un programa especial que se conoce como ``intérprete''. Tras
@@ -618,8 +618,9 @@ de datos para representar un entero (\verb!char!, \verb!int!, \verb!short int!,
 \verb!unsigned!) lo cual permite elegir el más apropiado para cada aplicación
 (según el rango de valores que se necesite representar, y la cantidad de
 memoria que se pueda invertir en ello), pero también agrega un nivel de
-dificultad extra para quien no domina los detalles. Python es considerado un
-lenguaje de alto nivel. No busca exponer los detalles internos de la máquina
+dificultad extra para quien no domina los detalles, o simplemente no necesita
+concentrarse en ellos. Python es considerado un lenguaje de alto nivel. No
+busca exponer los detalles internos de la máquina
 virtual ni de la máquina física subyacente. Esto, por supuesto, puede venir con
 una penalidad en la performance y una ganancia en la usabilidad del lenguaje.
 
@@ -688,12 +689,13 @@ defecto para realizar ciertas funciones:
 
 \subsection{Manejo de memoria}
 
-En C++ hay tres tipos de almacenamiento donde las variables pueden ser
-alojadas:
+En C++, las variables pueden ser alojadas dos tipos de
+almacenamiento\footnote{Omitimos las variables en memoria estática, aquellas
+que se declaran e inicializan en tiempo de compilación, por no ser relevantes
+para esta discusión}:
 
 \begin{itemize}
     \item Memoria automática (stack)
-    \item Memoria estática
     \item Memoria manual (heap)
 \end{itemize}
 
@@ -703,20 +705,17 @@ en la pila o stack, y liberadas cuando la función hace \verb!return! (cuando el
 activation record se remueve del stack). Esta memoria es manejada por el
 compilador y el programador no necesita preocuparse por su manejo explícito.
 
-Las variables en memoria estática se utilizan sólo para aquellas variables que
-se declaran e inicializan en tiempo de compilación.
-
-La mayoría de las veces, el programador debe recurrir a crear variables en el
-heap (ya sea porque necesita muchos objetos, o se trata de objetos ``grandes'',
-de varios bytes, que no caben en el stack). Este ``heap'' constituye una fuente
-de memoria que debe ser primeramente pedida al sistema operativo y debe ser
-devuelta posteriormente, cuando ya no es utilizada. Fallar en manejar
-correctamente este proceso implicaría la terminación inmediata del programa (si
-trata de acceder a memoria no pedida) o la pérdida de recursos que forman parte
-del ordenador pero que ya no pueden ser utilizados por ningún otro proceso (al
-menos, hasta que termine la ejecución del programa). El programador tiene que
-ser muy cuidadoso en este aspecto y suele ser uno de los elementos más
-difíciles de la programación en C++.
+Muchas veces, sin embargo, el programador debe recurrir a crear variables en el
+heap (ya sea porque necesita alojar muchos objetos, o se trata de objetos
+``grandes'', de varios bytes, que no caben en el stack). Este ``heap''
+constituye una fuente de memoria que debe ser primeramente pedida al sistema
+operativo y luego, cuando ya no es utilizada, debe ser devuelta. Fallar en
+manejar correctamente este proceso implicaría la terminación inmediata del
+programa (si trata de acceder a memoria no pedida) o la pérdida de recursos que
+forman parte del ordenador pero que ya no pueden ser utilizados por ningún otro
+proceso (al menos, hasta que termine la ejecución del programa). El programador
+tiene que ser muy cuidadoso en este aspecto y suele ser uno de los elementos
+más difíciles de la programación en C++.
 
 En Python, el proceso de pedir, utilizar y devolver memoria es manejado
 enteramente por un subsistema del intérprete o Python Runtime Environment. Al
@@ -737,7 +736,7 @@ el intérprete. Pero, a su vez, tiene costos:
 
 \begin{itemize}
     \item El algoritmo del Garbage Collector necesita tiempo para correr, y
-    este tiempo es en detrimento de la ejecución de nuestra aplicación
+    este tiempo es en detrimento de la ejecución de nuestra aplicación.
 
     \item El diseño de la gestión de la memoria busca minimizar el número de
     llamadas al sistema operativo y suele pedir recursos en bloques grandes,
