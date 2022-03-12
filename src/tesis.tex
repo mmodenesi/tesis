@@ -5,15 +5,22 @@
 
 \begin{document}
 
-\input{parts/titlepage}
+% dos páginas en blanco antes de la carátula
+\blankpage
 \blankpage
 
+\input{parts/titlepage}
+\blankpage
 \pagenumbering{roman}
+
+\input{parts/resumen}
+\setcounter{chapter}{0}  % el abstract está hecho con chapters
 
 \tableofcontents
 \clearpage
 
 \pagenumbering{arabic}
+
 
 \input{parts/ch1.tex}  % intro
 \input{parts/ch2.tex}  % estado del arte
